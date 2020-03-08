@@ -1,0 +1,258 @@
+import * as Sex from './types/sex';
+import * as ReproductionMethod from './types/reproductionMethod';
+
+import Food from './food';
+
+import * as Util from './util';
+
+export default class Creature {
+  constructor(world, genes, name, food, x, y) {
+    this.world = world;
+
+    this.genes = genes || Util.randomGenes();
+    this.name = name || Util.randomName();
+
+    this.age = 0;
+    this.food = food || 100;
+    this.health = 100;
+    this.dead = false;
+
+    this.x = x || Util.getRandomInt(-100, 101);
+    this.y = y || Util.getRandomInt(-100, 101);
+
+    this.reproductionMethod = ReproductionMethod.asexual; //Util.getRandom(ReproductionMethod);
+    this.sex = this.reproductionMethod === ReproductionMethod.asexual ? Sex.none : Util.randomSex();
+
+    this.lastReproduction = 0;
+    this.lookingForMate = false;
+
+    this.target = undefined;
+
+    this.generation = 0;
+
+    this.eventCallback = function() {};
+  }
+
+  reproduce(mate) {
+    let child = undefined;
+    let foodToGive = this.food / 100 * this.genes.get('reproduceFoodGiven').num;
+
+    if (foodToGive < 50 || this.food - foodToGive < 50) {
+      return false;
+    }
+
+    switch (this.reproductionMethod) {
+      case ReproductionMethod.asexual:
+        child = new Creature(this.world, this.genes, undefined, foodToGive, this.x, this.y);
+
+        break;
+
+      default:
+        let childGenes = new Map();
+
+        let randoms = Object.keys(this.genes).map((x) => Math.random());
+
+        let i = 0;
+        for (let [k, v] of this.genes) {
+          if (randoms[i] > 0.5) {
+            childGenes.set(k, v);
+          }
+
+          i++;
+        }
+
+        i = 0;
+
+        for (let [k, v] of mate.genes) {
+          if (randoms[i] < 0.5) {
+            childGenes.set(k, v);
+          }
+
+          i++;
+        }
+
+        child = new Creature(this.world, childGenes, undefined, foodToGive, this.x, this.y);
+    }
+
+    child.generation = this.generation + 1;
+
+    this.food -= foodToGive;
+
+    this.eventCallback('reproduce', child);
+
+    this.world.addCreature(child);
+
+    return child;
+  }
+
+  mutate() {
+    let arr = Array.from(this.genes.keys());
+    let r = this.genes.get(arr[Util.getRandomInt(0, arr.length)]).mutate();
+
+    this.eventCallback('mutate', {creature: this, gene: r});
+
+    return r;
+  }
+
+  die() {
+    this.dead = true;
+
+    this.eventCallback('die', this);
+  }
+
+  destroy() {
+    this.eventCallback('destory', this);
+
+    this.world.removeCreature(this);
+  }
+
+  eat(food) {
+    if (food.value() <= 0) {
+      food.destroy();
+      return false;
+    }
+
+    // console.log(food, food.value(), food.quantity, food.value() / (food.quantity / 10));
+
+    let speed = 20 / 100 * this.genes.get('eatingSpeed').num * this.world.speed;
+
+    if (food.food === undefined) {
+      this.food += food.value() / (food.quantity / 10);
+      food.quantity -= 10;
+    } else {
+      this.food += food.value() / (food.food / 10);
+      food.food -= 10;
+
+      if (food.food < 0) {
+        food.destroy();
+      }
+    }
+
+    food.update();
+
+    this.eventCallback('eat', food);
+  }
+
+  move(target) {
+    if (target === undefined || !this.world.inWorld(target)) { this.target = undefined; return; }
+
+    let distance = Util.distance(this, target);
+
+    if (distance < 5) {
+      this.target = undefined;
+      return true;
+    }
+
+    let speed = 0.01 * (this.genes.get('movingSpeed').num + 50 - (this.food / 100)) * this.world.speed;
+    this.food -= speed / 15;
+
+    let dx = target.x - this.x;
+    let dy = target.y - this.y;
+
+    let length = Math.sqrt(dx * dx + dy * dy)
+    dx = dx / length;
+    dy = dy / length;
+
+    let angle = Math.atan(dy, dx);
+
+    let magnitude = speed;
+    let velX = dx /*Math.cos(angle)*/ * magnitude;
+    let velY = dy /*Math.sin(angle)*/ * magnitude;
+
+    this.x += velX;
+    this.y += velY;
+
+    /*this.x = Util.lerp(this.x, target.x, speed / 50);
+    this.y = Util.lerp(this.y, target.y, speed / 50);*/
+
+    return false;
+  }
+
+  value() {
+    return this.food * 0.75 + 20;
+  }
+
+  update() {
+    if (this.dead) { // If dead, do nothing
+      this.eventCallback('update', this);
+      return false;
+    }
+
+    if (this.food <= 0 || this.health <= 0) {
+      this.die();
+      this.destroy();
+      return false;
+    }
+
+    if (this.health <= 0) { // Check if should be dead
+      this.die();
+      return false;
+    }
+
+    if (Math.random() < (this.genes.get('mutateChance').num / 10000) * this.world.speed) { // Check if should mutate
+      this.mutate();
+    }
+
+    if (this.food > this.genes.get('reproduceFoodNeeded').num * 5 && this.age > this.genes.get('reproductionAgeNeeded').num / 5 && this.age > this.lastReproduction + (this.genes.get('reproductionCooldown').num / 10)) { // Reproduce
+      if (this.reproductionMethod === ReproductionMethod.asexual) {
+        this.reproduce();
+
+        this.lastReproduction = this.age;
+      } else {
+        let nearbyMates = this.world.creatures.filter((c) => c.reproductionMethod === ReproductionMethod.mating && c.lookingForMate === true && c !== this).sort((a, b) => Util.distance(this, a) - Util.distance(this, b));
+
+        this.lookingForMate = true;
+
+        if (nearbyMates.length > 0) {
+          if (Util.distance(this, nearbyMates[0]) < 10) {
+            this.reproduce(nearbyMates[0]);
+
+            this.target = undefined;
+            this.lookingForMate = false;
+            this.lastReproduction = this.age;
+          } else {
+            this.target = nearbyMates[0];
+          }
+        }
+      }
+    } else {
+      this.lookingForMate = false;
+    }
+
+    let food = this.world.food.concat(this.world.creatures.filter((c) => c.dead)).sort((a, b) => Util.distance(this, a) - Util.distance(this, b));
+    let nearbyFood = food.filter((f) => Util.distance(this, f) < 5); // Eat nearby food
+
+    if (nearbyFood.length > 0) {
+      this.eat(nearbyFood[0]);
+    } else { // Goto nearby food
+      let goodFood = food.sort((a, b) => (b.value() - Util.distance(this, b)) - (a.value() - Util.distance(this, a)));
+
+      let targets = [];
+      for (let c of this.world.creatures.filter((c) => c !== this)) {
+        targets.push(c.target);
+      }
+
+      goodFood = goodFood.filter((f) => !targets.includes(f));
+
+      this.target = !this.lookingForMate && !this.target ? goodFood[0] : this.target;
+    }
+
+
+    if (this.age === 0) {
+      this.eventCallback('create', this);
+    }
+
+    this.move(this.target);
+
+    let speedFactor = this.world.speed;
+
+    this.age += (this.genes.get('ageDegrade').num / 100) * speedFactor;
+
+    // let foodFactor = 1.01; // / 60 * this.genes.get('hungerDegrade').num;
+
+    // this.food /= 1.01;
+    this.food -= (2 / 100 * this.genes.get('hungerDegrade').num) * speedFactor;
+
+    this.eventCallback('update', this);
+  }
+}
