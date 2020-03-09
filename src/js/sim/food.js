@@ -18,22 +18,24 @@ export default class Food {
   }
 
   update() {
-    if (this.value() <= 0) {
-      this.destroy();
-      return;
-    }
-
     if (this.age === 0) {
       this.eventCallback('create', this);
     }
 
-    let speedFactor = Util.speedFactor(this.world.speed);
+    this.quality -= 0.2 * this.world.speed;
+    this.age += 0.2 * this.world.speed;
 
-    this.quality -= 0.25 * speedFactor;
-    this.age += 0.25 * speedFactor;
+    this.eventCallback('update', this);
+
+    if (this.value() <= 0) {
+      this.destroy();
+      return;
+    }
   }
 
   value() {
+    if (this.quality <= 0) { return -1; }
+
     return this.quantity / 100 * (this.quality + 50);
   }
 

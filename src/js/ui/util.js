@@ -12,24 +12,37 @@ export function addLog(msg) {
     log.innerText = lineSplit.splice(1).join('\n');
   }
 
-  log.innerText += `${msg}\n`;
+  let el = document.createElement('div');
+  el.innerText = msg;
+
+  log.appendChild(el);
+  // log.innerText += `${msg}\n`;
 
   log.className = 'show';
-
-  let old = log.innerText;
 
   logLeft++;
 
   setTimeout(function() {
     logLeft--;
 
-    if (logLeft === 0) {//if (log.innerText === old || log.innerText.replace(`${msg}\n`, '') === '') {
+    /*if (logLeft === 0) {//if (log.innerText === old || log.innerText.replace(`${msg}\n`, '') === '') {
       log.className = '';
-    }
+    }*/
 
     setTimeout(function () {
-      let without = log.innerText.replace(`${msg}\n`, '');
-      log.innerText = without;
+      let child = [...log.children].find((c) => c.innerText === msg);
+
+      if (child === undefined) { return; }
+
+      child.style.opacity = 0;
+
+      if (log.children.length === 1) {
+        log.className = '';
+      }
+
+      setTimeout(function() {
+        log.removeChild(child);
+      }, 500);
     }, 1000);
   }, 2000);
 }

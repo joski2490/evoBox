@@ -24,19 +24,15 @@ export default class World {
     this.speed = 1;
     this.elapsedTime = 0;
 
+    this.updateBetween = 50;
+
     setTimeout(this.update.bind(this), 100);
     setInterval(function() { this.ups = this.updates; this.updates = 0; }.bind(this), 1000);
   }
 
   update() {
-    let speedFactor = Util.speedFactor(this.speed);
-    speedFactor = 1;
-
-    let updateBetween = 50;
-    let updateSpeed = updateBetween * speedFactor;
-
     if (this.paused) {
-      setTimeout(this.update.bind(this), updateSpeed);
+      setTimeout(this.update.bind(this), this.updateBetween);
 
       this.eventCallback('update', this);
 
@@ -59,7 +55,7 @@ export default class World {
       }
     }
 
-    if (this.food.length < 50 && performance.now() - this.lastAddedFood > 500 * this.speed) {
+    if (this.food.length < 50 && performance.now() - this.lastAddedFood > 500 / this.speed) {
       this.addFood(new Food(this));
       this.lastAddedFood = performance.now();
     }
@@ -87,8 +83,8 @@ export default class World {
 Average: ${showNumber(this.updateTimes.reduce((p, c) => c += p) / this.updateTimes.length)}ms
 Min: ${showNumber(Math.min(...this.updateTimes))}ms
 Max: ${showNumber(Math.max(...this.updateTimes))}ms
-Time between: ${showNumber(updateSpeed)}ms
-Compensated: ${showNumber(updateSpeed - diff)}ms
+Time between: ${showNumber(this.updateBetween)}ms
+Compensated: ${showNumber(this.updateBetween - diff)}ms
 
 UPS: ${this.ups}
 
@@ -101,11 +97,11 @@ Max Gen: ${Math.max(...generations)}`;
 
     diff = performance.now() - startTime;
 
-    setTimeout(this.update.bind(this), updateSpeed - diff);
+    setTimeout(this.update.bind(this), this.updateBetween - diff);
 
     this.updates++;
 
-    this.elapsedTime += (updateSpeed - diff) * this.speed;
+    this.elapsedTime += (this.updateBetween - diff) * this.speed;
 
     this.eventCallback('update', this);
   }

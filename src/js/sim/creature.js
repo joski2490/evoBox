@@ -2,8 +2,10 @@ import * as Sex from './types/sex';
 import * as ReproductionMethod from './types/reproductionMethod';
 
 import Food from './food';
+import Vector from './vector';
 
 import * as Util from './util';
+import * as UIUtil from '/js/ui/util';
 
 export default class Creature {
   constructor(world, genes, name, food, x, y) {
@@ -114,14 +116,14 @@ export default class Creature {
 
     // console.log(food, food.value(), food.quantity, food.value() / (food.quantity / 10));
 
-    let speed = 20 / 100 * this.genes.get('eatingSpeed').num * this.world.speed;
+    let speed = 15 / 100 * this.genes.get('eatingSpeed').num * this.world.speed;
 
     if (food.food === undefined) {
-      this.food += food.value() / (food.quantity / 10);
-      food.quantity -= 10;
+      this.food += speed * ((food.quality + 50) / 100);
+      food.quantity -= speed;
     } else {
-      this.food += food.value() / (food.food / 10);
-      food.food -= 10;
+      this.food += food.value() / (food.food / speed);
+      food.food -= speed;
 
       if (food.food < 0) {
         food.destroy();
@@ -145,6 +147,26 @@ export default class Creature {
 
     let speed = 0.01 * (this.genes.get('movingSpeed').num + 50 - (this.food / 100)) * this.world.speed;
     this.food -= speed / 15;
+
+    let tooCloseCreatures = this.world.creatures.filter((c) => c !== this && Util.distance(this, c) < 50);
+
+    if (tooCloseCreatures.length > 0) {
+      let final = new Vector(0, 0);
+
+      for (let c of tooCloseCreatures) {
+        let diff = new Vector(this.x - c.x, this.y - c.y);
+
+        diff.normalise();
+
+        final.add(diff);
+      }
+
+      final.divide(tooCloseCreatures.length);
+      final.normalise();
+
+      this.x += final.x * 0.2;
+      this.y += final.y * 0.2;
+    }
 
     let dx = target.x - this.x;
     let dy = target.y - this.y;
@@ -175,17 +197,6 @@ export default class Creature {
   update() {
     if (this.dead) { // If dead, do nothing
       this.eventCallback('update', this);
-      return false;
-    }
-
-    if (this.food <= 0 || this.health <= 0) {
-      this.die();
-      this.destroy();
-      return false;
-    }
-
-    if (this.health <= 0) { // Check if should be dead
-      this.die();
       return false;
     }
 
@@ -225,16 +236,18 @@ export default class Creature {
     if (nearbyFood.length > 0) {
       this.eat(nearbyFood[0]);
     } else { // Goto nearby food
-      let goodFood = food.sort((a, b) => (b.value() - Util.distance(this, b)) - (a.value() - Util.distance(this, a)));
+      let sortFunc = (f) => f.value() - Math.pow(Util.distance(this, f));
+
+      let goodFood = food.sort((a, b) => sortFunc(a) - sortFunc(b));
 
       let targets = [];
       for (let c of this.world.creatures.filter((c) => c !== this)) {
         targets.push(c.target);
       }
 
-      goodFood = goodFood.filter((f) => !targets.includes(f));
+      // goodFood = goodFood.filter((f) => !targets.includes(f));
 
-      this.target = !this.lookingForMate && !this.target ? goodFood[0] : this.target;
+      this.target = !(this.lookingForMate && this.target) ? goodFood[0] : this.target;
     }
 
 
@@ -244,14 +257,23 @@ export default class Creature {
 
     this.move(this.target);
 
-    let speedFactor = this.world.speed;
-
-    this.age += (this.genes.get('ageDegrade').num / 100) * speedFactor;
+    this.age += (this.genes.get('ageDegrade').num / 100) * this.world.speed;
 
     // let foodFactor = 1.01; // / 60 * this.genes.get('hungerDegrade').num;
 
     // this.food /= 1.01;
-    this.food -= (2 / 100 * this.genes.get('hungerDegrade').num) * speedFactor;
+    this.food -= (2 / 100 * this.genes.get('hungerDegrade').num) * this.world.speed;
+
+    if (this.food <= 0) {
+      this.die();
+      this.destroy();
+      return false;
+    }
+
+    if (this.health <= 0) { // Check if should be dead
+      this.die();
+      return false;
+    }
 
     this.eventCallback('update', this);
   }
