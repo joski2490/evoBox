@@ -10,7 +10,7 @@ export function create(food) {
   el.id = `food-${food.name}`;
   el.className = 'food';
 
-  document.body.appendChild(el);
+  document.getElementById('sandbox').appendChild(el);
 
   update(food);
 
@@ -33,7 +33,7 @@ export function update(food) {
   el.style.left = `${pos.x}px`;
   el.style.top = `${pos.y}px`;
 
-  let size = food.quantity / 3.5;
+  let size = food.quantity / 3 * UIUtil.sizeFactor();
   size = size < 15 ? 15 : size;
 
   el.style.width = `${size}px`;
@@ -48,7 +48,7 @@ export function destroy(food) {
     return false;
   }
 
-  document.body.removeChild(document.getElementById(`food-${food.name}`));
+  document.getElementById('sandbox').removeChild(document.getElementById(`food-${food.name}`));
 
   return true;
 }

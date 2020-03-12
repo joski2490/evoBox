@@ -1,5 +1,38 @@
 import * as UIUtil from './util';
+import * as SimUtil from '/js/sim/util';
 import * as UIFood from './food';
+import { Window, dragElement } from './window';
+
+function updateWindow(creature, windowBody) {
+  windowBody.innerHTML = '';
+
+  let rows = [
+    ['Food', Math.round(creature.food)],
+    ['Age', Math.round(creature.age)],
+    ['Sex', creature.sex],
+    ['Generation', creature.generation],
+    ['lastReproduction', creature.lastReproduction],
+    ['lookingForMate', creature.lookingForMate]
+  ];
+
+  for (let r of rows) {
+    let row = document.createElement('div');
+    row.className = 'row';
+
+    let rowLeft = document.createElement('div');
+    rowLeft.className = 'row-left';
+    rowLeft.innerText = r[0];
+
+    let rowRight = document.createElement('div');
+    rowRight.className = 'row-right';
+    rowRight.innerText = r[1];
+
+    row.appendChild(rowLeft);
+    row.appendChild(rowRight);
+
+    windowBody.appendChild(row);
+  }
+}
 
 export function create(creature) {
   if (document.getElementById(`creature-${creature.name}`) !== null) {
@@ -9,8 +42,15 @@ export function create(creature) {
   let el = document.createElement('div');
   el.id = `creature-${creature.name}`;
   el.className = 'creature';
+  el.onclick = function(e) {
+    [...document.getElementsByClassName('window')].forEach((x) => document.body.removeChild(x));
 
-  document.body.appendChild(el);
+    let window = Window(creature.name, e.clientX, e.clientY);
+
+    updateWindow(creature, window[1]);
+  };
+
+  document.getElementById('sandbox').appendChild(el);
 
   update(creature);
 
@@ -21,6 +61,8 @@ export function die(creature) {
   document.getElementById(`creature-${creature.name}`).classList.add('dead-creature');
 
   UIUtil.addLog(`${creature.name} died`);
+
+  addParticles('skull', 5, creature);
 }
 
 export function update(creature) {
@@ -28,6 +70,12 @@ export function update(creature) {
 
   if (el === null) {
     return false;
+  }
+
+  let window = document.getElementById(`window-${creature.name}`);
+
+  if (window !== null) {
+    updateWindow(creature, window.children[1]);
   }
 
   if (isNaN(creature.food)) {
@@ -41,14 +89,13 @@ export function update(creature) {
   el.style.left = `${pos.x}px`;
   el.style.top = `${pos.y}px`;
 
-  let size = creature.food / 3;
-  size = size < 20 ? 20 : size;
+  let size = 40 * UIUtil.sizeFactor();
+
+  el.style.width = `${size}px`;
+  el.style.height = `${size}px`;
+  el.style.lineHeight = `${size}px`;
 
   return true;
-
-  /*el.style.width = `${size}px`;
-  el.style.height = `${size}px`;
-  el.style.lineHeight = `${size}px`;*/
 }
 
 export function destory(creature) {
@@ -56,19 +103,67 @@ export function destory(creature) {
     return false;
   }
 
-  document.body.removeChild(document.getElementById(`creature-${creature.name}`));
+  document.getElementById('sandbox').removeChild(document.getElementById(`creature-${creature.name}`));
+
+  let window = document.getElementById(`window-${creature.name}`);
+
+  if (window !== null) {
+    document.body.removeChild(window);
+  }
 
   return true;
 }
 
 export function mutate({creature, gene}) {
   UIUtil.addLog(`${creature.name} mutated (${gene.name})`);
+
+  addParticles('mutate', 5, creature);
 }
 
-export function eat(food) {
+export function eat({creature, food}) {
   UIFood.update(food);
 }
 
-export function reproduce(child) {
+function addParticles(type, amount, creature) {
+  for (let i = 0; i < amount; i++) {
+    setTimeout(function() {
+      addParticle(type, creature);
+    }, i * 50);
+  }
+}
 
+function addParticle(type, creature) {
+  let creaturePos = UIUtil.getWindowPosition(creature);
+
+  let container = document.createElement('div');
+  container.className = 'particle-container';
+
+  let randomLeft = SimUtil.getRandomInt(-30, 31);
+  let randomTop = SimUtil.getRandomInt(30, 71);
+
+  container.style.left = `${creaturePos.x - randomLeft}px`;
+  container.style.top = `${creaturePos.y - randomTop}px`;
+  container.style.transitionDuration = `${1000 / creature.world.speed}ms`;
+
+  let particle = document.createElement('div');
+  particle.className = type;
+
+  container.appendChild(particle);
+
+  document.getElementById('sandbox').appendChild(container);
+
+  setTimeout(function() {
+    container.style.opacity = 0;
+    container.style.top = `${creaturePos.y - randomTop - 50}px`;
+  }, 10);
+
+  setTimeout(function() {
+    document.getElementById('sandbox').removeChild(container);
+  }, 1000 / creature.world.speed)
+}
+
+export function reproduce({creature, child}) {
+  UIUtil.addLog(`${creature.name} reproduced (${child.name})`);
+
+  addParticles('heart', 5, creature);
 }

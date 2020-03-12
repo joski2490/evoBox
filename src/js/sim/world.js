@@ -79,6 +79,7 @@ export default class World {
       genMedian = (generations[genHalf - 1] + generations[genHalf]) / 2.0;
     }
 
+    try {
     document.getElementById('debug').innerText = `Current: ${showNumber(diff)}ms
 Average: ${showNumber(this.updateTimes.reduce((p, c) => c += p) / this.updateTimes.length)}ms
 Min: ${showNumber(Math.min(...this.updateTimes))}ms
@@ -94,6 +95,7 @@ Food: ${this.food.length}
 Creatures: ${this.creatures.length} - ${this.creatures.filter((c) => c.dead).length} dead
 Median Gen: ${showNumber(generations.reduce((p, c) => c += p) / generations.length)}
 Max Gen: ${Math.max(...generations)}`;
+    } catch (e) {}
 
     diff = performance.now() - startTime;
 

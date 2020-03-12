@@ -1,5 +1,8 @@
 import * as UICreature from './creature';
 import * as UIFood from './food';
+import * as UIUtil from './util';
+
+import { Window, dragElement } from './window';
 
 async function creatureCallback(type, data) {
   let f = UICreature[type];
@@ -34,8 +37,10 @@ async function worldCallback(type, data) {
     document.getElementById('play').style.display = data.paused ? 'inline' : 'none';
     document.getElementById('pause').style.display = data.paused ? 'none' : 'inline';
 
-    document.getElementById('sf').innerText = `${data.speed}x`;
-    document.getElementById('elapsed').innerText = elapsedTime(data);
+    document.getElementById('sf').innerText = `🔁️ ${data.speed}x`;
+    document.getElementById('zf').innerText = `🔍 ${UIUtil.sizeFactor()}x`;
+
+    document.getElementById('elapsed').innerText = `⌛ ${elapsedTime(data)}`;
   }
 }
 
@@ -86,8 +91,43 @@ export function UIInit(world) {
         document.getElementById('debug').className = debug.className === '' ? 'show' : '';
       }
 
+      if (e.key === '=') {
+        let sandbox = document.getElementById('sandbox');
+        let width = sandbox.style.width ? sandbox.style.width : '2000px';
+        let size = parseFloat(width.replace('px', '')) + 500;
+
+        sandbox.style.width = `${size}px`;
+        sandbox.style.height = `${size}px`;
+      }
+
+      if (e.key === '-') {
+        let sandbox = document.getElementById('sandbox');
+        let width = sandbox.style.width ? sandbox.style.width : '2000px';
+        let size = parseFloat(width.replace('px', '')) - 500;
+        size = size < window.innerWidth ? (Math.floor(window.innerWidth / 500) + 1) * 500 : size;
+
+        let changed = size !== width;
+
+        sandbox.style.width = `${size}px`;
+        sandbox.style.height = `${size}px`;
+
+        if (changed) {
+          let top = parseFloat(sandbox.style.top.replace('px', '')) + 500;
+          top = top > 0 ? 0 : top;
+
+          sandbox.style.top = `${top}px`;
+
+          let left = parseFloat(sandbox.style.left.replace('px', '')) + 500;
+          left = left > 0 ? 0 : left;
+
+          sandbox.style.left = `${left}px`
+        }
+      }
+
       fired = true;
     }
+
+    e.preventDefault();
   };
 
   document.onkeyup = function() {
@@ -109,4 +149,6 @@ export function UIInit(world) {
   document.getElementById('fast').onclick = function() {
     world.speed += 0.25;
   };
+
+  dragElement(document.getElementById('sandbox'));
 }

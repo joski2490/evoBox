@@ -19,6 +19,8 @@ html, body {
 
     text-align: center;
     font-size: 12px;
+
+    cursor: pointer;
 }
 
 .creature {
@@ -71,7 +73,7 @@ html, body {
 }
 
 #top {
-    z-index: 10;
+    z-index: 999;
 
     position: absolute;
 
@@ -145,14 +147,20 @@ html, body {
 }
 
 #log > div {
-    opacity: 1;
-    transition: opacity 1s;
+    animation: fadeout 1s ease 2s 1 normal forwards;
+}
+
+@keyframes fadeout {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
 .symbol {
-    color: transparent;
-    text-shadow: 0 0 0 rgba(255, 255, 255, .87);
-
     z-index: 15;
 
     cursor: pointer;
@@ -178,17 +186,106 @@ html, body {
 
     width: 250px;
     height: 250px;
+
+    opacity: 0.9;
 }
 
 .window > header {
     padding: 10px;
+    padding-right: 35px;
 
     cursor: move;
+
     z-index: 10;
     background-color: #C62828;
     color: #fff;
+    height: 20px;
 }
 
+.window-close {
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    padding: 10px;
+
+    height: 20px;
+    width: 20px;
+
+    font-size: 40px;
+    line-height: 17px;
+
+    cursor: pointer;
+}
+
+.window-close::after {
+    content: "×";
+}
+
+.window-body {
+    padding: 10px;
+}
+
+.row {
+    display: block;
+
+    clear: both;
+    float: none;
+
+    height: 30px;
+}
+
+.row-left {
+    float: left;
+}
+
+.row-right {
+    float: right;
+
+    font-weight: bold;
+}
+
+.mutate:before {
+    content: "🧬";
+}
+
+.heart:before {
+    content: "💕";
+    font-size: 18px;
+}
+
+.skull::before {
+    content: "☠";
+    font-size: 18px;
+}
+
+.particle-container {
+    position: absolute;
+
+    opacity: 0.8;
+
+    transition: all 100ms;
+}
+
+#sandbox {
+    position: absolute;
+    /*top: -2500px;
+    left: -2500px;*/
+    top: 0;
+    left: 0;
+
+    width: 2000px;
+    height: 2000px;
+
+    cursor: grab;
+
+    background-color: #111111;
+}
+
+#sandbox:active {
+    cursor: grabbing;
+}
 
 ::-webkit-scrollbar {
     background-color: #1c1e1f;

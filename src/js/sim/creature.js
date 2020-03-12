@@ -5,7 +5,6 @@ import Food from './food';
 import Vector from './vector';
 
 import * as Util from './util';
-import * as UIUtil from '/js/ui/util';
 
 export default class Creature {
   constructor(world, genes, name, food, x, y) {
@@ -80,7 +79,7 @@ export default class Creature {
 
     this.food -= foodToGive;
 
-    this.eventCallback('reproduce', child);
+    this.eventCallback('reproduce', {creature: this, child});
 
     this.world.addCreature(child);
 
@@ -132,7 +131,7 @@ export default class Creature {
 
     food.update();
 
-    this.eventCallback('eat', food);
+    this.eventCallback('eat', {creature: this, food});
   }
 
   move(target) {
@@ -270,7 +269,7 @@ export default class Creature {
       return false;
     }
 
-    if (this.health <= 0) { // Check if should be dead
+    if (this.age >= 100 || this.health <= 0) { // Check if should be dead
       this.die();
       return false;
     }

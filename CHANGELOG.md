@@ -1,5 +1,19 @@
 # evoBox Changelog
 
+## v0.3.0 (March 12th)
+
+### Features
+- Add to log when creature reproduces
+- Added zooming, panning and relative space
+- Added Unicode / emojis to things in top bar
+- Added partices for mutating, reproducing and dying
+- Added window popup when clicking creatures including information
+
+### Fixes
+- Fixed some symbol fonts incorrectly rendering the time symbols
+- Readded age death for creatures
+
+
 ## v0.2.0 (March 9th)
 
 ### Features

@@ -1,6 +1,7 @@
 import { geneNames } from './types/geneNames';
 import Gene from './gene';
 import * as Sex from './types/sex';
+import { names } from './types/names';
 
 export function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -49,7 +50,7 @@ function randomNameSegment() {
 }
 
 export function randomName() {
-  return randomNameSegment() + randomNameSegment() + randomNameSegment();
+  return names[getRandomInt(0, names.length)];
 }
 
 export function distance(obj1, obj2) {

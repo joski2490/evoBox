@@ -1,5 +1,17 @@
 export function getWindowPosition(thing) {
-  return { x: document.body.clientWidth / 100 * ((thing.x + 100) / 2), y: document.body.clientHeight / 100 * ((thing.y + 100) / 2) };
+  return { x: document.getElementById('sandbox').offsetWidth / 100 * ((thing.x + 100) / 2), y: document.getElementById('sandbox').offsetWidth / 100 * ((thing.y + 100) / 2) };
+}
+
+export function sizeFactor() {
+  let width = sandbox.style.width ? sandbox.style.width : '2000px';
+  let size = parseFloat(width.replace('px', ''));
+
+  return size / 2000; //(4000 - size) / 2000;
+}
+
+export function sizeAmount() {
+  let width = sandbox.style.width ? sandbox.style.width : '2000px';
+  return parseFloat(width.replace('px', ''))
 }
 
 let logLeft = 0;
@@ -23,18 +35,28 @@ export function addLog(msg) {
   logLeft++;
 
   setTimeout(function() {
+    let child = [...log.children].find((c) => c.innerText === msg);
+
+    if (child === undefined) { return; }
+
+    if (log.children.length === 1) {
+      log.className = '';
+    }
+
+    log.removeChild(child);
+  }, 2500);
+
+  /*setTimeout(function() {
     logLeft--;
 
     /*if (logLeft === 0) {//if (log.innerText === old || log.innerText.replace(`${msg}\n`, '') === '') {
       log.className = '';
-    }*/
+    }
 
     setTimeout(function () {
       let child = [...log.children].find((c) => c.innerText === msg);
 
       if (child === undefined) { return; }
-
-      child.style.opacity = 0;
 
       if (log.children.length === 1) {
         log.className = '';
@@ -44,5 +66,5 @@ export function addLog(msg) {
         log.removeChild(child);
       }, 500);
     }, 1000);
-  }, 2000);
+  }, 2000);*/
 }
