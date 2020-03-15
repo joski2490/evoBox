@@ -2,10 +2,7 @@ import Food from './food';
 import Creature from './creature';
 import { UIWorld } from '../ui/main';
 import * as Util from './util';
-
-function showNumber(n) {
-  return parseFloat(n.toPrecision(3));
-}
+import * as UIUtil from '/js/ui/util';
 
 export default class World {
   constructor(food, creatures) {
@@ -24,9 +21,12 @@ export default class World {
     this.speed = 1;
     this.elapsedTime = 0;
 
-    this.updateBetween = 50;
+    this.updateBetween = 100;
+
+    this.options = {};
 
     setTimeout(this.update.bind(this), 100);
+
     setInterval(function() { this.ups = this.updates; this.updates = 0; }.bind(this), 1000);
   }
 
@@ -45,9 +45,17 @@ export default class World {
       c.update();
     }
 
-    for (let f of this.food) {
-      f.update();
+    let timeCreatureUpdate = performance.now() - startTime;
+
+    for (var i = this.food.length - 1; i >= 0; i--) {
+      this.food[i].update();
     }
+
+    /*for (let f of this.food) {
+      f.update();
+    }*/
+
+    let timeFoodUpdate = performance.now() - startTime;
 
     if (this.creatures.length === 0 || this.creatures.filter((c) => !c.dead).length === 0) {
       for (let i = 0; i < 5; i++) {
@@ -55,7 +63,7 @@ export default class World {
       }
     }
 
-    if (this.food.length < 50 && performance.now() - this.lastAddedFood > 500 / this.speed) {
+    if (this.food.length < 20 && performance.now() - this.lastAddedFood > 500 / this.speed) {
       this.addFood(new Food(this));
       this.lastAddedFood = performance.now();
     }
@@ -80,12 +88,15 @@ export default class World {
     }
 
     try {
-    document.getElementById('debug').innerText = `Current: ${showNumber(diff)}ms
-Average: ${showNumber(this.updateTimes.reduce((p, c) => c += p) / this.updateTimes.length)}ms
-Min: ${showNumber(Math.min(...this.updateTimes))}ms
-Max: ${showNumber(Math.max(...this.updateTimes))}ms
-Time between: ${showNumber(this.updateBetween)}ms
-Compensated: ${showNumber(this.updateBetween - diff)}ms
+    document.getElementById('debug').innerText = `Current: ${UIUtil.showNumber(diff)}ms
+Average: ${UIUtil.showNumber(this.updateTimes.reduce((p, c) => c += p) / this.updateTimes.length)}ms
+Min: ${UIUtil.showNumber(Math.min(...this.updateTimes))}ms
+Max: ${UIUtil.showNumber(Math.max(...this.updateTimes))}ms
+Time between: ${UIUtil.showNumber(this.updateBetween)}ms
+Compensated: ${UIUtil.showNumber(this.updateBetween - diff)}ms
+
+Creature: ${UIUtil.showNumber(timeCreatureUpdate)}ms
+Food: ${UIUtil.showNumber(timeFoodUpdate)}ms
 
 UPS: ${this.ups}
 
@@ -93,9 +104,9 @@ Entities: ${this.creatures.length + this.food.length}
 Food: ${this.food.length}
 
 Creatures: ${this.creatures.length} - ${this.creatures.filter((c) => c.dead).length} dead
-Median Gen: ${showNumber(generations.reduce((p, c) => c += p) / generations.length)}
+Median Gen: ${genMedian}
 Max Gen: ${Math.max(...generations)}`;
-    } catch (e) {}
+    } catch (e) { console.error(e); }
 
     diff = performance.now() - startTime;
 
@@ -103,7 +114,7 @@ Max Gen: ${Math.max(...generations)}`;
 
     this.updates++;
 
-    this.elapsedTime += (this.updateBetween - diff) * this.speed;
+    this.elapsedTime += this.updateBetween * this.speed;
 
     this.eventCallback('update', this);
   }
@@ -129,11 +140,26 @@ Max Gen: ${Math.max(...generations)}`;
   removeCreature(creature) {
     this.creatures.splice(this.creatures.indexOf(creature), 1);
 
-    this.eventCallback('removeFood', creature);
+    this.eventCallback('removeCreature', creature);
   }
 
   inWorld(object) {
     return this.creatures.includes(object) || this.food.includes(object);
+  }
+
+  restart() {
+    for (let c of [...this.creatures]) {
+      c.destroy();
+      this.removeCreature(c);
+    }
+
+    for (let f of [...this.food]) {
+      f.destroy();
+      this.removeFood(f);
+    }
+
+    this.elapsedTime = 0;
+    this.lastAddedFood = 0;
   }
 }
 

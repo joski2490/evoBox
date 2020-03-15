@@ -1,5 +1,30 @@
 # evoBox Changelog
 
+## v0.4.0 (March 15th)
+
+### Features
+- Improved creature name generation
+- Last names now stay with children
+- Added border to sandbox
+- Smooth entity movement
+- Added mode to have sandbox width = screen width
+- Creatures now have random colo(u)rs
+- Creatures size is now scaling with their mass / food
+- Added watermark
+- Added reset / restart button
+- Made top bar larger on larger displays
+- Added new logo
+
+### Changes
+- Removed version from title
+- Food is now green instead of red
+- Updated meta / description tags
+
+### Fixes
+- Force UI updates on entities when zooming (fixes nothing happening when paused and changing zoom)
+- Disable pointer cursor for food
+- Fixed creature removal event reporting the 'removeFood' event instead of the 'removeCreature' event
+
 ## v0.3.0 (March 12th)
 
 ### Features

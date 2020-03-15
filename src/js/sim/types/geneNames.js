@@ -9,5 +9,7 @@ export const geneNames = [
   'movingSpeed',
   'reproductionCooldown',
   'reproductionAgeNeeded',
-  'eatingSpeed'
+  'eatingSpeed',
+  'colorHue',
+  'colorLightness'
 ];

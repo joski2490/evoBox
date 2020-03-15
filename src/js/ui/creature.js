@@ -40,7 +40,7 @@ export function create(creature) {
   }
 
   let el = document.createElement('div');
-  el.id = `creature-${creature.name}`;
+  el.id = `creature-${UIUtil.makeID(creature.name)}`;
   el.className = 'creature';
   el.onclick = function(e) {
     [...document.getElementsByClassName('window')].forEach((x) => document.body.removeChild(x));
@@ -58,7 +58,16 @@ export function create(creature) {
 }
 
 export function die(creature) {
-  document.getElementById(`creature-${creature.name}`).classList.add('dead-creature');
+  let el = document.getElementById(`creature-${UIUtil.makeID(creature.name)}`);
+
+  if (el === null) {
+    return false;
+  }
+
+  el.classList.add('dead-creature');
+
+  el.style.color = '#ffffff';
+  el.style.backgroundColor = 'gray';
 
   UIUtil.addLog(`${creature.name} died`);
 
@@ -66,13 +75,13 @@ export function die(creature) {
 }
 
 export function update(creature) {
-  let el = document.getElementById(`creature-${creature.name}`);
+  let el = document.getElementById(`creature-${UIUtil.makeID(creature.name)}`);
 
   if (el === null) {
     return false;
   }
 
-  let window = document.getElementById(`window-${creature.name}`);
+  let window = document.getElementById(`window-${UIUtil.makeID(creature.name)}`);
 
   if (window !== null) {
     updateWindow(creature, window.children[1]);
@@ -82,30 +91,46 @@ export function update(creature) {
     console.warn(creature);
   }
 
-  el.innerText = `${creature.generation}_${Math.round(creature.food)}`;
+  el.innerText = creature.name.split(' ').join('\n');
 
   let pos = UIUtil.getWindowPosition(creature);
 
   el.style.left = `${pos.x}px`;
   el.style.top = `${pos.y}px`;
 
-  let size = 40 * UIUtil.sizeFactor();
+  let scaleAll = creature.world.creatures.map((x) => x.food).sort((a, b) => b - a);
+  let scaleMax = scaleAll[0];
+
+  let size = (120 - 40) * (creature.food / scaleMax) + 40;
+
+  size *= UIUtil.sizeFactor();
 
   el.style.width = `${size}px`;
   el.style.height = `${size}px`;
-  el.style.lineHeight = `${size}px`;
+  el.style.lineHeight = `${size / 2}px`;
+  el.style.fontSize = `${size / 5}px`;
+
+  el.style.backgroundColor = `hsl(${creature.genes.get('colorHue').num * 3.6}, 100%, ${creature.genes.get('colorLightness').num}%)`;
+  
+  let rgb = el.style.backgroundColor.replace('rgb(', '').replace(')', '').split(', ').map((x) => parseFloat(x));
+
+  let decider = rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114;
+  el.style.color = decider > 180 ? '#1f1f1f' : '#ffffff';
+
+  // el.innerText = decider;
 
   return true;
 }
 
-export function destory(creature) {
-  if (document.getElementById(`creature-${creature.name}`) === null) {
+export function destroy(creature) {
+  if (document.getElementById(`creature-${UIUtil.makeID(creature.name)}`) === null) {
+    console.log(creature.name);
     return false;
   }
 
-  document.getElementById('sandbox').removeChild(document.getElementById(`creature-${creature.name}`));
+  document.getElementById('sandbox').removeChild(document.getElementById(`creature-${UIUtil.makeID(creature.name)}`));
 
-  let window = document.getElementById(`window-${creature.name}`);
+  let window = document.getElementById(`window-${UIUtil.makeID(creature.name)}`);
 
   if (window !== null) {
     document.body.removeChild(window);

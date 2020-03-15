@@ -31,11 +31,14 @@ export default class Creature {
 
     this.generation = 0;
 
+    this.destroyed = false;
+
     this.eventCallback = function() {};
   }
 
   reproduce(mate) {
     let child = undefined;
+    let name = Util.randomHalfName() + ' ' + this.name.split(' ')[1];
     let foodToGive = this.food / 100 * this.genes.get('reproduceFoodGiven').num;
 
     if (foodToGive < 50 || this.food - foodToGive < 50) {
@@ -44,7 +47,7 @@ export default class Creature {
 
     switch (this.reproductionMethod) {
       case ReproductionMethod.asexual:
-        child = new Creature(this.world, this.genes, undefined, foodToGive, this.x, this.y);
+        child = new Creature(this.world, this.genes, name, foodToGive, this.x, this.y);
 
         break;
 
@@ -72,7 +75,7 @@ export default class Creature {
           i++;
         }
 
-        child = new Creature(this.world, childGenes, undefined, foodToGive, this.x, this.y);
+        child = new Creature(this.world, childGenes, name, foodToGive, this.x, this.y);
     }
 
     child.generation = this.generation + 1;
@@ -102,9 +105,11 @@ export default class Creature {
   }
 
   destroy() {
-    this.eventCallback('destory', this);
+    this.eventCallback('destroy', this);
 
     this.world.removeCreature(this);
+
+    this.destroyed = true;
   }
 
   eat(food) {
@@ -135,7 +140,7 @@ export default class Creature {
   }
 
   move(target) {
-    if (target === undefined || !this.world.inWorld(target)) { this.target = undefined; return; }
+    if (target === undefined || target.destroyed === true) { this.target = undefined; return; }
 
     let distance = Util.distance(this, target);
 

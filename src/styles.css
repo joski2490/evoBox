@@ -20,7 +20,7 @@ html, body {
     text-align: center;
     font-size: 12px;
 
-    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .creature {
@@ -29,6 +29,8 @@ html, body {
     line-height: 40px;
 
     background-color: green;
+
+    cursor: pointer;
 }
 
 .dead-creature {
@@ -38,8 +40,17 @@ html, body {
 .food {
     width: 20px;
     height: 20px;
+}
 
-    background-color: yellow;
+.food::before {
+    content: attr(data-before-content);
+    opacity: var(--before-opacity);
+
+    position: absolute;
+    z-index: -1;
+    font-size: var(--before-size);
+
+    transform: translateX(-50%);
 }
 
 #debug {
@@ -85,7 +96,10 @@ html, body {
 
     transform: translateX(-50%);
 
-    width: 300px;
+    min-width: 300px;
+    max-width: 600px;
+
+    width: 50%;
     height: 20px;
     line-height: 20px;
 
@@ -120,6 +134,7 @@ html, body {
 @media (max-width: 350px) {
     #top {
         width: calc(100% - 25px);
+        min-width: 0;
     }
 }
 
@@ -280,11 +295,35 @@ html, body {
 
     cursor: grab;
 
+    border: 5px solid rgb(50, 56, 56);
+
     background-color: #111111;
 }
 
 #sandbox:active {
     cursor: grabbing;
+}
+
+#corner {
+    z-index: 999;
+
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+
+    opacity: 0.2;
+    height: 32px;
+}
+
+#version {
+    display: inline-block;
+
+    width: 10px;
+    height: 32px;
+    line-height: 12px;
+    
+    font-size: 12px;
+    font-weight: 300;
 }
 
 ::-webkit-scrollbar {

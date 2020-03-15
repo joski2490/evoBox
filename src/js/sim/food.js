@@ -4,10 +4,11 @@ export default class Food {
   constructor(world, quantity, quality, x, y) {
     this.world = world;
 
-    this.name = Util.randomName();
+    this.name = Util.randomChars();
 
     this.quantity = quantity || Util.getRandomInt(1, 101);
     this.quality = quality || Util.getRandomInt(1, 101);
+    this.originalQuality = this.quality;
 
     this.x = x || Util.getRandomInt(-100, 101);
     this.y = y || Util.getRandomInt(-100, 101);
@@ -15,17 +16,20 @@ export default class Food {
     this.age = 0;
 
     this.eventCallback = function() {};
+
+    this.destroyed = false;
   }
 
   update() {
-    if (this.age === 0) {
+    if (this.quality === this.originalQuality) {
       this.eventCallback('create', this);
+
+      delete this.originalQuality;
     }
 
     this.quality -= 0.2 * this.world.speed;
-    this.age += 0.2 * this.world.speed;
 
-    this.eventCallback('update', this);
+    setTimeout(function() { this.eventCallback('update', this); }.bind(this), 1);
 
     if (this.value() <= 0) {
       this.destroy();
@@ -43,5 +47,7 @@ export default class Food {
     this.eventCallback('destroy', this);
 
     this.world.removeFood(this);
+
+    this.destroyed = true;
   }
 }

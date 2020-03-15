@@ -1,8 +1,8 @@
-import { sizeAmount } from './util';
+import * as UIUtil from './util';
 
 export function Window(name, x, y) {
   let window = document.createElement('div');
-  window.id = `window-${name}`;
+  window.id = `window-${UIUtil.makeID(name)}`;
   window.className = 'window';
 
   window.style.left = `${x}px`;
@@ -70,9 +70,9 @@ export function dragElement(elmnt) {
       sizeTop = sizeTop > 0 ? 0 : sizeTop;
       sizeLeft = sizeLeft > 0 ? 0 : sizeLeft;
 
-      while (sizeTop + sizeAmount() < window.innerHeight) { sizeTop++; }
+      while (sizeTop + UIUtil.sizeAmount() < window.innerHeight - 10) { sizeTop++; }
 
-      while (sizeLeft + sizeAmount() < window.innerWidth) { sizeLeft++; }
+      while (sizeLeft + UIUtil.sizeAmount() < window.innerWidth - 10) { sizeLeft++; }
     }
 
     elmnt.style.top = sizeTop + "px";

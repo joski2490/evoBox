@@ -45,12 +45,20 @@ export function randomSex() {
   return Sex.female;
 }
 
-function randomNameSegment() {
+function randomCharSegment() {
   return Math.random().toString(36).substr(2, 5);
 }
 
-export function randomName() {
+export function randomChars() {
+  return randomCharSegment() + randomCharSegment() + randomCharSegment();
+}
+
+export function randomHalfName() {
   return names[getRandomInt(0, names.length)];
+}
+
+export function randomName() {
+  return names[getRandomInt(0, names.length)] + ' ' + names[getRandomInt(0, names.length)];
 }
 
 export function distance(obj1, obj2) {

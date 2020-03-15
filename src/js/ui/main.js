@@ -4,6 +4,8 @@ import * as UIUtil from './util';
 
 import { Window, dragElement } from './window';
 
+let screenSize = 'full';
+
 async function creatureCallback(type, data) {
   let f = UICreature[type];
 
@@ -25,22 +27,52 @@ async function worldCallback(type, data) {
     data.eventCallback = creatureCallback;
   }
 
+  if (type === 'removeCreature') {
+    UICreature.destroy(data);
+  }
+
   if (type === 'addFood') {
     data.eventCallback = foodCallback;
   }
 
   if (type === 'removeFood') {
-    //UIFood.destroy(data);
+    UIFood.destroy(data);
   }
 
   if (type === 'update') {
     document.getElementById('play').style.display = data.paused ? 'inline' : 'none';
     document.getElementById('pause').style.display = data.paused ? 'none' : 'inline';
 
-    document.getElementById('sf').innerText = `🔁️ ${data.speed}x`;
-    document.getElementById('zf').innerText = `🔍 ${UIUtil.sizeFactor()}x`;
+    document.getElementById('sf').innerText = `${UIUtil.showNumber(data.speed)}x`;
+    document.getElementById('zf').innerText = `${UIUtil.showNumber(UIUtil.sizeFactor())}x`;
 
-    document.getElementById('elapsed').innerText = `⌛ ${elapsedTime(data)}`;
+    document.getElementById('elapsed').innerText = `${elapsedTime(data)}`;
+
+    if (screenSize === 'full') {
+      let sandbox = document.getElementById('sandbox');
+      let cWidth = sandbox.style.width.replace('px', '');
+      let sWidth = window.innerWidth - 10;
+      if (window.innerHeight > sWidth) {
+        sWidth = window.innerHeight - 10;
+      }
+
+      // let diff = cWidth - sWidth;
+
+      if (cWidth != sWidth) {
+        sandbox.style.width = `${sWidth}px`;
+        sandbox.style.height = `${sWidth}px`;
+
+        let top = 0; //parseFloat(sandbox.style.top.replace('px', '')) + diff;
+        top = top > 0 ? 0 : top;
+
+        sandbox.style.top = `${top}px`;
+
+        let left = 0; //parseFloat(sandbox.style.left.replace('px', '')) + diff;
+        left = left > 0 ? 0 : left;
+
+        sandbox.style.left = `${left}px`;
+      }
+    }
   }
 }
 
@@ -65,6 +97,8 @@ export function UIWorld(world) {
   window.onload = function() {
     UIInit(world);
   };
+
+  world.options.emojiMode = false;
 }
 
 export function UIInit(world) {
@@ -91,6 +125,8 @@ export function UIInit(world) {
         document.getElementById('debug').className = debug.className === '' ? 'show' : '';
       }
 
+      let update = false;
+
       if (e.key === '=') {
         let sandbox = document.getElementById('sandbox');
         let width = sandbox.style.width ? sandbox.style.width : '2000px';
@@ -98,6 +134,8 @@ export function UIInit(world) {
 
         sandbox.style.width = `${size}px`;
         sandbox.style.height = `${size}px`;
+
+        update = true;
       }
 
       if (e.key === '-') {
@@ -120,11 +158,33 @@ export function UIInit(world) {
           let left = parseFloat(sandbox.style.left.replace('px', '')) + 500;
           left = left > 0 ? 0 : left;
 
-          sandbox.style.left = `${left}px`
+          sandbox.style.left = `${left}px`;
+
+          update = true;
         }
       }
 
+      if (e.key === 'f') {
+        screenSize = screenSize === 'full' ? 'dynamic' : 'full';
+      }
+
+      if (e.key === 'e') {
+        world.options.emojiMode = !world.options.emojiMode;
+
+        update = true;
+      }
+
       fired = true;
+
+      if (update === true) {
+        for (let c of world.creatures) {
+          UICreature.update(c);
+        }
+
+        for (let f of world.food) {
+          UIFood.update(f);
+        }
+      }
     }
 
     e.preventDefault();
@@ -148,6 +208,10 @@ export function UIInit(world) {
 
   document.getElementById('fast').onclick = function() {
     world.speed += 0.25;
+  };
+
+  document.getElementById('restart').onclick = function() {
+    world.restart();
   };
 
   dragElement(document.getElementById('sandbox'));
