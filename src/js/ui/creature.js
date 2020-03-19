@@ -9,6 +9,7 @@ function updateWindow(creature, windowBody) {
   let rows = [
     ['Food', Math.round(creature.food)],
     ['Age', Math.round(creature.age)],
+    ['Dead', creature.dead],
     ['Sex', creature.sex],
     ['Generation', creature.generation],
     ['lastReproduction', creature.lastReproduction],

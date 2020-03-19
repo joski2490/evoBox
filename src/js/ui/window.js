@@ -10,12 +10,19 @@ export function Window(name, x, y) {
 
   let header = document.createElement('header');
   header.innerText = name;
+  header.id = `${window.id}-header`;
 
   window.appendChild(header);
 
   let close = document.createElement('div');
   close.className = 'window-close';
-  close.onclick = function() { document.body.removeChild(window); };
+  close.onclick = function() {
+    window.classList.add('closing-window');
+
+    setTimeout(function() {
+      document.body.removeChild(window);
+    }, 400);
+  };
 
   header.appendChild(close);
 
@@ -33,9 +40,13 @@ export function Window(name, x, y) {
 
 export function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  if (document.getElementById(elmnt.id + "-header")) {
+
+  let header = elmnt.children[0];
+  header = header !== undefined ? header.id.includes('header') : undefined;
+
+  if (header === true) {
     // if present, the header is where you move the DIV from:
-    document.getElementById(elmnt.id + "-header").onmousedown = dragMouseDown;
+    elmnt.children[0].onmousedown = dragMouseDown;
   } else {
     // otherwise, move the DIV from anywhere inside the DIV:
     elmnt.onmousedown = dragMouseDown;

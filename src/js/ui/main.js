@@ -1,6 +1,7 @@
 import * as UICreature from './creature';
 import * as UIFood from './food';
 import * as UIUtil from './util';
+import SimFood from '/js/sim/food';
 
 import { Window, dragElement } from './window';
 
@@ -25,6 +26,7 @@ async function foodCallback(type, data) {
 async function worldCallback(type, data) {
   if (type === 'addCreature') {
     data.eventCallback = creatureCallback;
+    UICreature.create(data);
   }
 
   if (type === 'removeCreature') {
@@ -33,6 +35,7 @@ async function worldCallback(type, data) {
 
   if (type === 'addFood') {
     data.eventCallback = foodCallback;
+    UIFood.create(data);
   }
 
   if (type === 'removeFood') {
@@ -101,8 +104,53 @@ export function UIWorld(world) {
   world.options.emojiMode = false;
 }
 
+function UIUpdate(world) {
+  for (let c of world.creatures) {
+    UICreature.update(c);
+  }
+
+  for (let f of world.food) {
+    UIFood.update(f);
+  }
+}
+
+function increaseSpeed(world) {
+  world.speed = world.speed >= 5 ? world.speed : world.speed + 0.25;
+}
+
+function decreaseSpeed(world) {
+  world.speed = world.speed <= 0.25 ? world.speed : world.speed - 0.25;
+}
+
+function showControls() {
+  let win = new Window('Controls', 10, 10);
+  win[0].style.height = '380px';
+
+  let rows = [['Speed Up', '>'], ['Slow Down', '<'], ['Pause', 'Space'], ['', ''], ['Zoom Out', '-'], ['Zoom In', '='], ['Full Mode', 'f'], ['', ''], ['Controls', '?'], ['Debug', 'd'], ['🙂 🇲​🇴​🇩​🇪', 'e']];
+
+  for (let r of rows) {
+    let row = document.createElement('div');
+    row.className = 'row';
+
+    let rowLeft = document.createElement('div');
+    rowLeft.className = 'row-left';
+    rowLeft.innerText = r[0];
+
+    let rowRight = document.createElement('div');
+    rowRight.className = 'row-right';
+    rowRight.innerText = r[1];
+
+    row.appendChild(rowLeft);
+    row.appendChild(rowRight);
+
+    win[1].appendChild(row);
+  }
+}
+
 export function UIInit(world) {
   let fired = false;
+
+  showControls();
 
   document.onkeypress = function (e) {
     if (!fired) {
@@ -113,19 +161,17 @@ export function UIInit(world) {
       }
 
       if (e.key === '>') {
-        world.speed += 0.25;
+        increaseSpeed(world);
       }
 
       if (e.key === '<') {
-        world.speed -= 0.25;
+        decreaseSpeed(world);
       }
 
       if (e.key === 'd') {
         let debug = document.getElementById('debug');
         document.getElementById('debug').className = debug.className === '' ? 'show' : '';
       }
-
-      let update = false;
 
       if (e.key === '=') {
         let sandbox = document.getElementById('sandbox');
@@ -135,7 +181,7 @@ export function UIInit(world) {
         sandbox.style.width = `${size}px`;
         sandbox.style.height = `${size}px`;
 
-        update = true;
+        UIUpdate(world);
       }
 
       if (e.key === '-') {
@@ -160,7 +206,7 @@ export function UIInit(world) {
 
           sandbox.style.left = `${left}px`;
 
-          update = true;
+          UIUpdate(world);
         }
       }
 
@@ -171,20 +217,14 @@ export function UIInit(world) {
       if (e.key === 'e') {
         world.options.emojiMode = !world.options.emojiMode;
 
-        update = true;
+        UIUpdate(world);
+      }
+
+      if (e.key === '?') {
+        showControls();
       }
 
       fired = true;
-
-      if (update === true) {
-        for (let c of world.creatures) {
-          UICreature.update(c);
-        }
-
-        for (let f of world.food) {
-          UIFood.update(f);
-        }
-      }
     }
 
     e.preventDefault();
@@ -203,15 +243,26 @@ export function UIInit(world) {
   };
 
   document.getElementById('slow').onclick = function() {
-    world.speed -= 0.25;
+    decreaseSpeed(world);
   };
 
   document.getElementById('fast').onclick = function() {
-    world.speed += 0.25;
+    increaseSpeed(world);
   };
 
   document.getElementById('restart').onclick = function() {
     world.restart();
+  };
+
+  document.getElementById('sandbox').ondblclick = function(e) {
+    let x = e.clientX - parseFloat(document.getElementById('sandbox').style.left.replace('px', ''));
+    let y = e.clientY - parseFloat(document.getElementById('sandbox').style.top.replace('px', ''));
+
+    let pos = UIUtil.getRelativePosition(x, y);
+
+    world.addFood(new SimFood(world, undefined, undefined, pos.x, pos.y));
+
+    UIUpdate(world);
   };
 
   dragElement(document.getElementById('sandbox'));

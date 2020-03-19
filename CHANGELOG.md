@@ -1,5 +1,21 @@
 # evoBox Changelog
 
+## v0.5.0 (March 19th)
+
+### Features
+- Double click anywhere in sandbox to add food
+- Added controls window
+- Added fadein and fadeout animations to windows
+- Food and age of dead creatures continue to change
+- Added dead attribute to creature window
+
+### Changes
+- Made windows more transparent
+
+### Fixes
+- Fixed windows being able to be dragged from their body, only header
+
+
 ## v0.4.0 (March 15th)
 
 ### Features

@@ -8,7 +8,6 @@ export default class Food {
 
     this.quantity = quantity || Util.getRandomInt(1, 101);
     this.quality = quality || Util.getRandomInt(1, 101);
-    this.originalQuality = this.quality;
 
     this.x = x || Util.getRandomInt(-100, 101);
     this.y = y || Util.getRandomInt(-100, 101);
@@ -21,12 +20,6 @@ export default class Food {
   }
 
   update() {
-    if (this.quality === this.originalQuality) {
-      this.eventCallback('create', this);
-
-      delete this.originalQuality;
-    }
-
     this.quality -= 0.2 * this.world.speed;
 
     setTimeout(function() { this.eventCallback('update', this); }.bind(this), 1);

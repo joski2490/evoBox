@@ -199,6 +199,10 @@ export default class Creature {
   }
 
   update() {
+    this.age += (this.genes.get('ageDegrade').num / 100) * this.world.speed;
+
+    this.food -= (2 / 100 * this.genes.get('hungerDegrade').num) * this.world.speed;
+
     if (this.dead) { // If dead, do nothing
       this.eventCallback('update', this);
       return false;
@@ -208,7 +212,7 @@ export default class Creature {
       this.mutate();
     }
 
-    if (this.food > this.genes.get('reproduceFoodNeeded').num * 5 && this.age > this.genes.get('reproductionAgeNeeded').num / 5 && this.age > this.lastReproduction + (this.genes.get('reproductionCooldown').num / 10)) { // Reproduce
+    if (this.food > this.genes.get('reproduceFoodNeeded').num * 5 && this.age > this.genes.get('reproductionAgeNeeded').num / 4 && this.age > this.lastReproduction + (this.genes.get('reproductionCooldown').num / 10)) { // Reproduce
       if (this.reproductionMethod === ReproductionMethod.asexual) {
         this.reproduce();
 
@@ -254,19 +258,7 @@ export default class Creature {
       this.target = !(this.lookingForMate && this.target) ? goodFood[0] : this.target;
     }
 
-
-    if (this.age === 0) {
-      this.eventCallback('create', this);
-    }
-
     this.move(this.target);
-
-    this.age += (this.genes.get('ageDegrade').num / 100) * this.world.speed;
-
-    // let foodFactor = 1.01; // / 60 * this.genes.get('hungerDegrade').num;
-
-    // this.food /= 1.01;
-    this.food -= (2 / 100 * this.genes.get('hungerDegrade').num) * this.world.speed;
 
     if (this.food <= 0) {
       this.die();

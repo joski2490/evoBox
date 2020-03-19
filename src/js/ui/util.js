@@ -1,5 +1,9 @@
 export function getWindowPosition(thing) {
-  return { x: document.getElementById('sandbox').offsetWidth / 100 * ((thing.x + 100) / 2), y: document.getElementById('sandbox').offsetWidth / 100 * ((thing.y + 100) / 2) };
+  return { x: document.getElementById('sandbox').offsetWidth / 100 * ((thing.x + 100) / 2), y: document.getElementById('sandbox').offsetHeight / 100 * ((thing.y + 100) / 2) };
+}
+
+export function getRelativePosition(posX, posY) {
+  return { x: (posX * 200) / document.getElementById('sandbox').offsetWidth - 100, y: (posY * 200) / document.getElementById('sandbox').offsetHeight - 100 };
 }
 
 export function sizeFactor() {
