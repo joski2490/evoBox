@@ -1,6 +1,8 @@
 import * as UIUtil from './util';
 import * as SimUtil from '/js/sim/util';
 
+import { addParticles } from './particles';
+
 let foods = [...'🍇🍈🍉🍊🍋🍌🍍🥭🍎🍏🍐🍑🍒🍓🥝🍅🥥🥑🍆🥔🥕🌽🌶🥒🥬🥦🍄🥜🌰🍞🥐🥖🥨🥯🥞🧀🍖🍗🥩🥓🍔🍟🍕🌭🥪🌮🌯🥙🍳🥘🍲🥣🥗🍿🧂🥫🍱🍘🍙🍚🍛🍜🍝🍠🍢🍣🍤🍥🥮🍡🥟🥠🥡🍦🍧🍨🍩🍪🎂🍰🧁🥧🍫🍬🍭🍮🍯🍼🥛☕🍵🍶🍾🍷🍸🍹🍺🍻🥂🥃🥤'];
 
 export function create(food) {
@@ -56,6 +58,10 @@ export function update(food) {
     el.innerText = Math.round(food.value());
   }
 
+  if (food.infections.length > 0) {
+    addParticles('infection', 1, food);
+  }
+
   return true;
 }
 
@@ -67,4 +73,25 @@ export function destroy(food) {
   document.getElementById('sandbox').removeChild(document.getElementById(`food-${food.name}`));
 
   return true;
+}
+
+
+export function infection({thing, disease}) {
+  let el = document.getElementById(`food-${thing.name}`);
+
+  if (el === null) {
+    return false;
+  }
+
+  UIUtil.addLog(`${thing.name} became infected with ${disease.name}`, 'bad');
+}
+
+export function uninfection({thing, disease}) {
+  let el = document.getElementById(`food-${thing.name}`);
+
+  if (el === null) {
+    return false;
+  }
+
+  UIUtil.addLog(`${thing.name} is no longer infected with ${disease.name}`, 'bad');
 }

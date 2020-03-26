@@ -81,9 +81,15 @@ export function dragElement(elmnt) {
       sizeTop = sizeTop > 0 ? 0 : sizeTop;
       sizeLeft = sizeLeft > 0 ? 0 : sizeLeft;
 
-      while (sizeTop + UIUtil.sizeAmount() < window.innerHeight - 10) { sizeTop++; }
+      let adjTop = sizeTop + UIUtil.sizeAmount()
+      if (adjTop < window.innerHeight) {
+        sizeTop -= adjTop - window.innerHeight;
+      }
 
-      while (sizeLeft + UIUtil.sizeAmount() < window.innerWidth - 10) { sizeLeft++; }
+      let adjLeft = sizeLeft + UIUtil.sizeAmount();
+      if (adjLeft < window.innerWidth) {
+        sizeLeft -= adjLeft - window.innerWidth;
+      }
     }
 
     elmnt.style.top = sizeTop + "px";

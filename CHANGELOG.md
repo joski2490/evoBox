@@ -1,5 +1,29 @@
 # evoBox Changelog
 
+## v1.0.0 (March 26th)
+
+### Features
+- **Added diseases**
+- Pressing 'r' now restarts the world
+- Zooming with shortcuts Ctrl + key now zooms the sandbox instead of the actual page
+- **Added coloring to log messages**
+- Can now pan around by scrolling
+- **New renderer using canvas, a lot more performant and uses less resources**
+- Updated panning border restriction to be smoother
+- **Added new random multicolor moving background**
+- Updated some styling of the UI
+
+### Changes
+- Auto exit full zoom mode on attempt to change zoom
+- Unmade dead creatures degrade
+- Made controls window's width is smaller
+
+### Fixes
+- Fixed creatures able to mate with dead creatures
+- Fixed children not having genes after mating
+- Fixed children from asexual reproduction's genes being linked to their parent (if either change, they both change)
+
+
 ## v0.5.0 (March 19th)
 
 ### Features

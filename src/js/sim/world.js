@@ -1,13 +1,18 @@
 import Food from './food';
 import Creature from './creature';
+
+import Disease from './disease';
+import * as TransmissionMethod from './types/transmissionMethod';
+
 import { UIWorld } from '../ui/main';
-import * as Util from './util';
 import * as UIUtil from '/js/ui/util';
+
 
 export default class World {
   constructor(food, creatures) {
     this.food = food || [];
     this.creatures = creatures || [];
+    this.diseases = [];
 
     //this.updateInterval = setInterval(this.update.bind(this), 100);
 
@@ -66,6 +71,15 @@ export default class World {
     if (this.food.length < 20 && performance.now() - this.lastAddedFood > 500 / this.speed) {
       this.addFood(new Food(this));
       this.lastAddedFood = performance.now();
+    }
+
+    if (Math.random() < 0.01 && this.elapsedTime > 1) {
+      let d = new Disease();
+      this.diseases.push(d);
+
+      let o = d.infectRandom(this);
+
+      UIUtil.addLog(`New disease outbreak: ${d.name} - Patient Zero: ${o.name} (${o.type})`, 'bad');
     }
 
     let diff = performance.now() - startTime;
@@ -165,9 +179,3 @@ Max Gen: ${Math.max(...generations)}`;
 
 window._world = new World();
 UIWorld(window._world);
-
-/*
-TODO:
-- dynamic ms / ups compensating with lag
-- show time between updates wanted + actual
-*/

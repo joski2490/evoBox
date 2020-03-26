@@ -1,28 +1,22 @@
 import * as Util from './util';
+import Thing from './thing';
 
-export default class Food {
+export default class Food extends Thing {
   constructor(world, quantity, quality, x, y) {
-    this.world = world;
+    super(world, x, y, 'food');
 
     this.name = Util.randomChars();
 
     this.quantity = quantity || Util.getRandomInt(1, 101);
     this.quality = quality || Util.getRandomInt(1, 101);
-
-    this.x = x || Util.getRandomInt(-100, 101);
-    this.y = y || Util.getRandomInt(-100, 101);
-
-    this.age = 0;
-
-    this.eventCallback = function() {};
-
-    this.destroyed = false;
   }
 
   update() {
     this.quality -= 0.2 * this.world.speed;
 
     setTimeout(function() { this.eventCallback('update', this); }.bind(this), 1);
+
+    this.infections.forEach((x) => x.run(this));
 
     if (this.value() <= 0) {
       this.destroy();

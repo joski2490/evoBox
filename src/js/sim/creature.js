@@ -1,3 +1,5 @@
+import Thing from './thing';
+
 import * as Sex from './types/sex';
 import * as ReproductionMethod from './types/reproductionMethod';
 
@@ -6,22 +8,31 @@ import Vector from './vector';
 
 import * as Util from './util';
 
-export default class Creature {
+function deepCloneGenes(genes) {
+  let r = new Map();
+
+  console.error(genes);
+
+  for (let [k, v] of genes) {
+    r.set(k, v);
+  }
+
+  console.warn(r);
+
+  return r;
+}
+
+export default class Creature extends Thing {
   constructor(world, genes, name, food, x, y) {
-    this.world = world;
+    super(world, x, y, 'creature');
 
     this.genes = genes || Util.randomGenes();
     this.name = name || Util.randomName();
 
-    this.age = 0;
     this.food = food || 100;
     this.health = 100;
-    this.dead = false;
 
-    this.x = x || Util.getRandomInt(-100, 101);
-    this.y = y || Util.getRandomInt(-100, 101);
-
-    this.reproductionMethod = ReproductionMethod.asexual; //Util.getRandom(ReproductionMethod);
+    this.reproductionMethod = ReproductionMethod.mating; //Util.getRandom(ReproductionMethod);
     this.sex = this.reproductionMethod === ReproductionMethod.asexual ? Sex.none : Util.randomSex();
 
     this.lastReproduction = 0;
@@ -31,9 +42,11 @@ export default class Creature {
 
     this.generation = 0;
 
-    this.destroyed = false;
-
-    this.eventCallback = function() {};
+    this.efficiency = {
+      eating: 100,
+      immune: 100,
+      movement: 100
+    };
   }
 
   reproduce(mate) {
@@ -47,18 +60,18 @@ export default class Creature {
 
     switch (this.reproductionMethod) {
       case ReproductionMethod.asexual:
-        child = new Creature(this.world, this.genes, name, foodToGive, this.x, this.y);
+        child = new Creature(this.world, deepCloneGenes(this.genes), name, foodToGive, this.x, this.y);
 
         break;
 
       default:
         let childGenes = new Map();
 
-        let randoms = Object.keys(this.genes).map((x) => Math.random());
+        let randoms = [...this.genes.keys()].map((x) => Math.random());
 
         let i = 0;
         for (let [k, v] of this.genes) {
-          if (randoms[i] > 0.5) {
+          if (randoms[i] >= 0.5) {
             childGenes.set(k, v);
           }
 
@@ -74,6 +87,8 @@ export default class Creature {
 
           i++;
         }
+
+        console.log(childGenes, randoms);
 
         child = new Creature(this.world, childGenes, name, foodToGive, this.x, this.y);
     }
@@ -121,6 +136,7 @@ export default class Creature {
     // console.log(food, food.value(), food.quantity, food.value() / (food.quantity / 10));
 
     let speed = 15 / 100 * this.genes.get('eatingSpeed').num * this.world.speed;
+    speed = speed / 100 * this.efficiency.eating;
 
     if (food.food === undefined) {
       this.food += speed * ((food.quality + 50) / 100);
@@ -150,6 +166,8 @@ export default class Creature {
     }
 
     let speed = 0.01 * (this.genes.get('movingSpeed').num + 50 - (this.food / 100)) * this.world.speed;
+    speed = speed / 100 * this.efficiency.movement;
+
     this.food -= speed / 15;
 
     let tooCloseCreatures = this.world.creatures.filter((c) => c !== this && Util.distance(this, c) < 50);
@@ -199,14 +217,18 @@ export default class Creature {
   }
 
   update() {
+    if (this.dead) { // If dead, do nothing
+      this.lookingForMate = false;
+      this.target = undefined;
+
+      this.eventCallback('update', this);
+
+      return false;
+    }
+
     this.age += (this.genes.get('ageDegrade').num / 100) * this.world.speed;
 
     this.food -= (2 / 100 * this.genes.get('hungerDegrade').num) * this.world.speed;
-
-    if (this.dead) { // If dead, do nothing
-      this.eventCallback('update', this);
-      return false;
-    }
 
     if (Math.random() < (this.genes.get('mutateChance').num / 10000) * this.world.speed) { // Check if should mutate
       this.mutate();
@@ -260,6 +282,8 @@ export default class Creature {
 
     this.move(this.target);
 
+    this.infections.forEach((x) => x.run(this));
+
     if (this.food <= 0) {
       this.die();
       this.destroy();
@@ -271,6 +295,8 @@ export default class Creature {
       return false;
     }
 
-    this.eventCallback('update', this);
+    setTimeout(function() { this.eventCallback('update', this); }.bind(this), 1);
+
+    //this.eventCallback('update', this);
   }
 }

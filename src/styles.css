@@ -21,6 +21,8 @@ html, body {
     font-size: 12px;
 
     transition: all 0.2s;
+
+    z-index: 2;
 }
 
 .creature {
@@ -105,9 +107,9 @@ html, body {
 
     border-radius: 3px;
 
-    border: 1px solid rgba(100, 106, 106, 0.4);
+    border: 1px solid rgba(100, 106, 106, 0.8);
 
-    background-color: rgba(100, 106, 106, 0.2);
+    background-color: rgba(100, 106, 106, 0.6);
     opacity: 0.9;
 
     transition: left 1s;
@@ -146,6 +148,9 @@ html, body {
     left: 50px;
 
     width: 50%;
+    max-height: 50%;
+    
+    overflow-y: auto;
 
     opacity: 0;
     background-color: rgba(0, 6, 6, 0.2);
@@ -161,6 +166,10 @@ html, body {
     opacity: 0.8;
 }
 
+#log.full > div {
+    opacity: 1;
+}
+
 #log > div {
     animation: fadeout 1s ease 2s 1 normal forwards;
 }
@@ -172,7 +181,24 @@ html, body {
 
     to {
         opacity: 0;
+        display: none;
     }
+}
+
+.log-type-bad {
+    color: red;
+}
+
+.log-type-good {
+    color: green;
+}
+
+.line {
+    position: absolute;
+    width: 3px;
+    background-color: red;
+
+    z-index: 1;
 }
 
 .symbol {
@@ -290,6 +316,7 @@ html, body {
 
 .mutate:before {
     content: "🧬";
+    font-size: 18px;
 }
 
 .heart:before {
@@ -300,6 +327,15 @@ html, body {
 .skull::before {
     content: "☠";
     font-size: 18px;
+    
+    color: white;
+}
+
+.infection::before {
+    content: "☣️";
+    font-size: 18px;
+    
+    color: red;
 }
 
 .particle-container {
@@ -322,9 +358,9 @@ html, body {
 
     cursor: grab;
 
-    border: 5px solid rgb(50, 56, 56);
+    /*border: 5px solid rgb(50, 56, 56);
 
-    background-color: #111111;
+    background-color: #111111;*/
 }
 
 #sandbox:active {
@@ -338,8 +374,10 @@ html, body {
     bottom: 10px;
     left: 10px;
 
-    opacity: 0.2;
+    opacity: 0.5;
     height: 32px;
+
+    pointer-events: none;
 }
 
 #version {

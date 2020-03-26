@@ -5,6 +5,8 @@ import SimFood from '/js/sim/food';
 
 import { Window, dragElement } from './window';
 
+import * as Renderer from './renderer';
+
 let screenSize = 'full';
 
 async function creatureCallback(type, data) {
@@ -19,30 +21,32 @@ async function foodCallback(type, data) {
   let f = UIFood[type];
 
   if (f !== undefined) {
-    f(data);
+    //f(data);
   }
 }
 
 async function worldCallback(type, data) {
   if (type === 'addCreature') {
     data.eventCallback = creatureCallback;
-    UICreature.create(data);
+    //UICreature.create(data);
   }
 
   if (type === 'removeCreature') {
-    UICreature.destroy(data);
+    //UICreature.destroy(data);
   }
 
   if (type === 'addFood') {
     data.eventCallback = foodCallback;
-    UIFood.create(data);
+    //UIFood.create(data);
   }
 
   if (type === 'removeFood') {
-    UIFood.destroy(data);
+    //UIFood.destroy(data);
   }
 
   if (type === 'update') {
+    //Renderer.update(data);
+
     document.getElementById('play').style.display = data.paused ? 'inline' : 'none';
     document.getElementById('pause').style.display = data.paused ? 'none' : 'inline';
 
@@ -54,9 +58,9 @@ async function worldCallback(type, data) {
     if (screenSize === 'full') {
       let sandbox = document.getElementById('sandbox');
       let cWidth = sandbox.style.width.replace('px', '');
-      let sWidth = window.innerWidth - 10;
+      let sWidth = window.innerWidth;
       if (window.innerHeight > sWidth) {
-        sWidth = window.innerHeight - 10;
+        sWidth = window.innerHeight;
       }
 
       // let diff = cWidth - sWidth;
@@ -64,6 +68,8 @@ async function worldCallback(type, data) {
       if (cWidth != sWidth) {
         sandbox.style.width = `${sWidth}px`;
         sandbox.style.height = `${sWidth}px`;
+        sandbox.width = sWidth;
+        sandbox.height = sWidth;
 
         let top = 0; //parseFloat(sandbox.style.top.replace('px', '')) + diff;
         top = top > 0 ? 0 : top;
@@ -98,6 +104,8 @@ export function UIWorld(world) {
   world.eventCallback = worldCallback;
 
   window.onload = function() {
+    Renderer.init(world);
+
     UIInit(world);
   };
 
@@ -106,11 +114,11 @@ export function UIWorld(world) {
 
 function UIUpdate(world) {
   for (let c of world.creatures) {
-    UICreature.update(c);
+    //UICreature.update(c);
   }
 
   for (let f of world.food) {
-    UIFood.update(f);
+    //UIFood.update(f);
   }
 }
 
@@ -124,9 +132,10 @@ function decreaseSpeed(world) {
 
 function showControls() {
   let win = new Window('Controls', 10, 10);
-  win[0].style.height = '380px';
+  win[0].style.height = '410px';
+  win[0].style.width = '200px';
 
-  let rows = [['Speed Up', '>'], ['Slow Down', '<'], ['Pause', 'Space'], ['', ''], ['Zoom Out', '-'], ['Zoom In', '='], ['Full Mode', 'f'], ['', ''], ['Controls', '?'], ['Debug', 'd'], ['🙂 🇲​🇴​🇩​🇪', 'e']];
+  let rows = [['Speed Up', '>'], ['Slow Down', '<'], ['Pause', 'Space'], ['', ''], ['Zoom Out', '-'], ['Zoom In', '='], ['Full Mode', 'f'], ['', ''], ['Restart World', 'r'], ['Controls', '?'], ['Debug', 'd'], ['🙂 🇲​🇴​🇩​🇪', 'e']];
 
   for (let r of rows) {
     let row = document.createElement('div');
@@ -145,6 +154,51 @@ function showControls() {
 
     win[1].appendChild(row);
   }
+}
+
+function zoomIn(world) {
+  let sandbox = document.getElementById('sandbox');
+  let width = sandbox.style.width ? sandbox.style.width : '2000px';
+  let size = parseFloat(width.replace('px', '')) + 500;
+
+  sandbox.style.width = `${size}px`;
+  sandbox.style.height = `${size}px`;
+  sandbox.width = size;
+  sandbox.height = size;
+
+  UIUpdate(world);
+
+  screenSize = 'dynamic';
+}
+
+function zoomOut(world) {
+  let sandbox = document.getElementById('sandbox');
+  let width = sandbox.style.width ? sandbox.style.width : '2000px';
+  let size = parseFloat(width.replace('px', '')) - 500;
+  size = size < window.innerWidth ? (Math.floor(window.innerWidth / 500) + 1) * 500 : size;
+
+  let changed = size !== width;
+
+  sandbox.style.width = `${size}px`;
+  sandbox.style.height = `${size}px`;
+  sandbox.width = size;
+  sandbox.height = size;
+
+  if (changed) {
+    let top = parseFloat(sandbox.style.top.replace('px', '')) + 500;
+    top = top > 0 ? 0 : top;
+
+    sandbox.style.top = `${top}px`;
+
+    let left = parseFloat(sandbox.style.left.replace('px', '')) + 500;
+    left = left > 0 ? 0 : left;
+
+    sandbox.style.left = `${left}px`;
+
+    UIUpdate(world);
+  }
+
+  screenSize = 'dynamic';
 }
 
 export function UIInit(world) {
@@ -174,40 +228,11 @@ export function UIInit(world) {
       }
 
       if (e.key === '=') {
-        let sandbox = document.getElementById('sandbox');
-        let width = sandbox.style.width ? sandbox.style.width : '2000px';
-        let size = parseFloat(width.replace('px', '')) + 500;
-
-        sandbox.style.width = `${size}px`;
-        sandbox.style.height = `${size}px`;
-
-        UIUpdate(world);
+        zoomIn(world);
       }
 
       if (e.key === '-') {
-        let sandbox = document.getElementById('sandbox');
-        let width = sandbox.style.width ? sandbox.style.width : '2000px';
-        let size = parseFloat(width.replace('px', '')) - 500;
-        size = size < window.innerWidth ? (Math.floor(window.innerWidth / 500) + 1) * 500 : size;
-
-        let changed = size !== width;
-
-        sandbox.style.width = `${size}px`;
-        sandbox.style.height = `${size}px`;
-
-        if (changed) {
-          let top = parseFloat(sandbox.style.top.replace('px', '')) + 500;
-          top = top > 0 ? 0 : top;
-
-          sandbox.style.top = `${top}px`;
-
-          let left = parseFloat(sandbox.style.left.replace('px', '')) + 500;
-          left = left > 0 ? 0 : left;
-
-          sandbox.style.left = `${left}px`;
-
-          UIUpdate(world);
-        }
+        zoomOut(world);
       }
 
       if (e.key === 'f') {
@@ -218,6 +243,10 @@ export function UIInit(world) {
         world.options.emojiMode = !world.options.emojiMode;
 
         UIUpdate(world);
+      }
+
+      if (e.key === 'r') {
+        world.restart();
       }
 
       if (e.key === '?') {
@@ -232,6 +261,49 @@ export function UIInit(world) {
 
   document.onkeyup = function() {
     fired = false;
+  };
+
+  document.onkeydown = function(event) {
+    if (event.ctrlKey === true) {
+      if (event.key === '-') {
+        zoomOut(world);
+
+        event.preventDefault();
+      }
+
+      if (event.key === '=') {
+        zoomIn(world);
+
+        event.preventDefault();
+      }
+    }  
+  };
+
+  document.onwheel = function(e) {
+    let elmnt = document.getElementById('sandbox');
+
+    let newTop = elmnt.offsetTop - e.deltaY;
+    let newLeft = elmnt.offsetLeft - e.deltaX;
+
+    newTop = newTop > 0 ? 0 : newTop;
+    newLeft = newLeft > 0 ? 0 : newLeft;
+
+    let adjTop = newTop + UIUtil.sizeAmount()
+    if (adjTop < window.innerHeight) {
+      newTop -= adjTop - window.innerHeight;
+    }
+
+    let adjLeft = newLeft + UIUtil.sizeAmount();
+    if (adjLeft < window.innerWidth) {
+      newLeft -= adjLeft - window.innerWidth;
+    }
+
+    //while (newTop + UIUtil.sizeAmount() < window.innerHeight) { newTop++; }
+
+    //while (newLeft + UIUtil.sizeAmount() < window.innerWidth) { newLeft++; }
+
+    elmnt.style.top = newTop + "px";
+    elmnt.style.left = newLeft + "px";
   };
 
   document.getElementById('play').onclick = function() {
