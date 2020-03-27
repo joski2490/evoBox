@@ -1,6 +1,19 @@
 # evoBox Changelog
 
-### v1.0.0-RC2 (March 27th)
+## v1.0.1 (March 27th)
+
+### Features
+- Added padding to avoid objects being against the edges
+- Added occlusion culling (hiding unseen objects) to objects
+
+### Changes
+- Force renderer to update when zoom changes
+
+### Fixes
+- Fixed that sometimes genes were missed in the child after mating
+
+
+## v1.0.0-RC2 (March 27th)
 
 ### Changes
 - Upped frame rate lock to 60 (from 30)

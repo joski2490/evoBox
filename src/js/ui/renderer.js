@@ -84,13 +84,22 @@ let lastBack = [];
 export function update(world) {
   let startTime = performance.now();
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  let el = document.getElementById('sandbox');
 
-  let numCells = 300;
+  let sLeft = -el.offsetLeft;
+  let sTop = -el.offsetTop;
+
+  //ctx.clearRect(sLeft, sTop, sLeft + canvas.width, sTop + canvas.height);
+
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  let numCells = 300 * UIUtil.sizeFactor();
   let bgCellSize = Math.round(Math.sqrt((canvas.width * canvas.height) / numCells));
 
-  for (let x = 5; x < canvas.width / 1.5; x += bgCellSize) {
-    for (let y = 5; y < canvas.height / 1.5; y += bgCellSize) {
+  let frameInterval = 5;
+
+  for (let x = 5; x < canvas.width; x += bgCellSize) {
+    for (let y = 5; y < canvas.height; y += bgCellSize) {
       let nX = x;
       nX += world.elapsedTime / 10;
       nX /= 1000;
@@ -100,7 +109,7 @@ export function update(world) {
       nY /= 1000;
 
       let r, g, b;
-      if (frame === 0 || frame % 5 === 0) {
+      if (frame === 0 || frame % frameInterval === 0) {
         r = pn.noise(nX, nY, 0) * 255;
         g = pn.noise(nX, nY, 0.5) * 255;
         b = pn.noise(nX, nY, 1) * 255;
@@ -123,8 +132,6 @@ export function update(world) {
         b = a[2];
       }
 
-      // console.log(n, world.elapsedTime);
-
       ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
       ctx.fillRect(x, y, x + bgCellSize, y + bgCellSize);
     }
@@ -133,7 +140,6 @@ export function update(world) {
   ctx.strokeStyle = 'rgb(50, 56, 56)';
   ctx.lineWidth = 10;
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
 
   let scaleAll = world.creatures.map((x) => x.food).sort((a, b) => b - a);
   let scaleMax = scaleAll[0];
@@ -160,6 +166,10 @@ export function update(world) {
       ctx.stroke();
 
       ctx.globalAlpha = 1;
+    }
+
+    if (!(pos.x > sLeft - 100 && pos.x < sLeft + window.innerWidth + 100) || !(pos.y > sTop - 100 && pos.y < sTop + window.innerHeight + 100)) {
+      continue;
     }
 
     let size = (80 - 40) * (c.food / scaleMax) + 40;
@@ -200,11 +210,15 @@ export function update(world) {
     f.rendererQuantity = f.rendererQuantity || f.quantity;
     f.rendererQuantity = adjustParam(f.rendererQuantity, f.quantity, 0.5);
 
-    let screenPos = UIUtil.getWindowPosition(f.rendererPos);
+    let pos = UIUtil.getWindowPosition(f.rendererPos);
+
+    if (!(pos.x > sLeft - 100 && pos.x < sLeft + window.innerWidth + 100) || !(pos.y > sTop - 100 && pos.y < sTop + window.innerHeight + 100)) {
+      continue;
+    }
 
     let size = (f.rendererQuantity / 2) * UIUtil.sizeFactor();
 
-    renderCircle(screenPos.x, screenPos.y, size,
+    renderCircle(pos.x, pos.y, size,
       `hsl(100, 100%, ${f.quality}%)`,
       `hsl(100, 100%, ${f.quality - 10}%)`);
 

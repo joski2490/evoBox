@@ -67,28 +67,14 @@ export default class Creature extends Thing {
       default:
         let childGenes = new Map();
 
-        let randoms = [...this.genes.keys()].map((x) => Math.random());
-
-        let i = 0;
-        for (let [k, v] of this.genes) {
-          if (randoms[i] >= 0.5) {
-            childGenes.set(k, v);
-          }
-
-          i++;
-        }
-
-        i = 0;
-
-        for (let [k, v] of mate.genes) {
-          if (randoms[i] < 0.5) {
-            childGenes.set(k, v);
-          }
-
-          i++;
-        }
-
-        console.log(childGenes, randoms);
+        let keys = [...new Set([...this.genes.keys(),...mate.genes.keys()])].sort();
+        keys.forEach(key => {
+            if (Math.random() >= 0.5) {
+                childGenes.set(key, this.genes.get(key));
+            } else {
+                childGenes.set(key, mate.genes.get(key));
+            }
+        });
 
         child = new Creature(this.world, childGenes, name, foodToGive, this.x, this.y);
     }

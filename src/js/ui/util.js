@@ -1,16 +1,17 @@
+let windowPadding = 50;
+
 export function getWindowPosition(thing) {
-  return { x: document.getElementById('sandbox').offsetWidth / 100 * ((thing.x + 100) / 2), y: document.getElementById('sandbox').offsetHeight / 100 * ((thing.y + 100) / 2) };
+  return { x: ((document.getElementById('sandbox').offsetWidth - 2 * windowPadding) / 100 * ((thing.x + 100) / 2)) + windowPadding,
+    y: ((document.getElementById('sandbox').offsetHeight - 2 * windowPadding) / 100 * ((thing.y + 100) / 2)) + windowPadding };
 }
 
 export function getRelativePosition(posX, posY) {
-  return { x: (posX * 200) / document.getElementById('sandbox').offsetWidth - 100, y: (posY * 200) / document.getElementById('sandbox').offsetHeight - 100 };
+  return { x: 100 * (document.getElementById('sandbox').offsetWidth - 2 * posX) / (2 * windowPadding - document.getElementById('sandbox').offsetWidth),
+    y: 100 * (document.getElementById('sandbox').offsetHeight - 2 * posY) / (2 * windowPadding - document.getElementById('sandbox').offsetHeight) };
 }
 
 export function sizeFactor() {
-  let width = sandbox.style.width ? sandbox.style.width : '2000px';
-  let size = parseFloat(width.replace('px', ''));
-
-  return size / 2000; //(4000 - size) / 2000;
+  return sizeAmount() / 2000;
 }
 
 export function sizeAmount() {

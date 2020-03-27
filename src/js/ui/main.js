@@ -112,15 +112,6 @@ export function UIWorld(world) {
   world.options.emojiMode = false;
 }
 
-function UIUpdate(world) {
-  for (let c of world.creatures) {
-    //UICreature.update(c);
-  }
-
-  for (let f of world.food) {
-    //UIFood.update(f);
-  }
-}
 
 function increaseSpeed(world) {
   world.speed = world.speed >= 5 ? world.speed : world.speed + 0.25;
@@ -166,9 +157,9 @@ function zoomIn(world) {
   sandbox.width = size;
   sandbox.height = size;
 
-  UIUpdate(world);
-
   screenSize = 'dynamic';
+
+  Renderer.update(world);
 }
 
 function zoomOut(world) {
@@ -194,11 +185,11 @@ function zoomOut(world) {
     left = left > 0 ? 0 : left;
 
     sandbox.style.left = `${left}px`;
-
-    UIUpdate(world);
   }
 
   screenSize = 'dynamic';
+
+  Renderer.update(world);
 }
 
 export function UIInit(world) {
@@ -241,8 +232,6 @@ export function UIInit(world) {
 
       if (e.key === 'e') {
         world.options.emojiMode = !world.options.emojiMode;
-
-        UIUpdate(world);
       }
 
       if (e.key === 'r') {
@@ -333,8 +322,6 @@ export function UIInit(world) {
     let pos = UIUtil.getRelativePosition(x, y);
 
     world.addFood(new SimFood(world, undefined, undefined, pos.x, pos.y));
-
-    UIUpdate(world);
   };
 
   dragElement(document.getElementById('sandbox'));
