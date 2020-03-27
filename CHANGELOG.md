@@ -1,5 +1,12 @@
 # evoBox Changelog
 
+### v1.0.0-RC2 (March 27th)
+
+### Changes
+- Upped frame rate lock to 60 (from 30)
+- Decreased total background cells to 300 (from 500)
+
+
 ## v1.0.0 (March 26th)
 
 ### Features

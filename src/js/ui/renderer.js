@@ -6,7 +6,7 @@ export let canvas, ctx;
 export let fps = 0, updates = 0;
 
 let frame = 0;
-let timeBetween = 33; //16.6; //33;
+let timeBetween = 16.6; //33;
 
 export let particles = [];
 
@@ -86,8 +86,7 @@ export function update(world) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
-  let numCells = 500;
+  let numCells = 300;
   let bgCellSize = Math.round(Math.sqrt((canvas.width * canvas.height) / numCells));
 
   for (let x = 5; x < canvas.width / 1.5; x += bgCellSize) {
