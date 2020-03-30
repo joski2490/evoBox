@@ -10,6 +10,9 @@ let timeBetween = 16.6; //33;
 
 export let particles = [];
 
+let foods = [...'🍇🍈🍉🍊🍋🍌🍍🥭🍎🍏🍐🍑🍒🍓🥝🍅🥥🥑🍆🥔🥕🌽🌶🥒🥬🥦🍄🥜🌰🍞🥐🥖🥨🥯🥞🧀🍖🍗🥩🥓🍔🍟🍕🌭🥪🌮🌯🥙🍳🥘🍲🥣🥗🍿🧂🥫🍱🍘🍙🍚🍛🍜🍝🍠🍢🍣🍤🍥🥮🍡🥟🥠🥡🍦🍧🍨🍩🍪🎂🍰🧁🥧🍫🍬🍭🍮🍯🍼🥛☕🍵🍶🍾🍷🍸🍹🍺🍻🥂🥃🥤'];
+
+
 export function init(world) {
   canvas = document.createElement('canvas');
   canvas.width = 2000;
@@ -192,7 +195,7 @@ export function update(world) {
     renderText(pos.x, pos.y - (size / 4) + size / 8, size / 3, decider > 180 ? '#1f1f1f' : '#ffffff', splitName[0]);
     renderText(pos.x, pos.y + (size / 4) + size / 8, size / 3, decider > 180 ? '#1f1f1f' : '#ffffff', splitName[1]);
 
-    if (frame % 10 === 0) {
+    if (frame % 20 === 0) {
       if (c.infections.length > 0) {
         addParticle('infection', c, '', 20);
       }
@@ -210,6 +213,8 @@ export function update(world) {
     f.rendererQuantity = f.rendererQuantity || f.quantity;
     f.rendererQuantity = adjustParam(f.rendererQuantity, f.quantity, 0.5);
 
+    f.rendererEmoji = f.rendererEmoji || foods[SimUtil.getRandomInt(0, foods.length)];
+
     let pos = UIUtil.getWindowPosition(f.rendererPos);
 
     if (!(pos.x > sLeft - 100 && pos.x < sLeft + window.innerWidth + 100) || !(pos.y > sTop - 100 && pos.y < sTop + window.innerHeight + 100)) {
@@ -218,9 +223,21 @@ export function update(world) {
 
     let size = (f.rendererQuantity / 2) * UIUtil.sizeFactor();
 
-    renderCircle(pos.x, pos.y, size,
-      `hsl(100, 100%, ${f.quality}%)`,
-      `hsl(100, 100%, ${f.quality - 10}%)`);
+    if (world.options.emojiMode) {
+      renderText(pos.x, pos.y + 10, size + 15,
+        `hsl(100, 100%, ${f.quality}%)`,
+        f.rendererEmoji);
+    } else {
+      renderCircle(pos.x, pos.y, size,
+        `hsl(100, 100%, ${f.quality}%)`,
+        `hsl(100, 100%, ${f.quality - 10}%)`);
+    }
+
+    if (frame % 20 === 0) {
+      if (f.infections.length > 0) {
+        addParticle('infection', f, '', 20);
+      }
+    }
 
     // renderText(screenPos.x, screenPos.y + size / 8, size / 3, '#ffffff', Math.round(f.value()));
   }
@@ -244,7 +261,7 @@ export function update(world) {
 
   let sandbox = document.getElementById('sandbox');
 
-  renderText(10 + -sandbox.offsetLeft, 20 + -sandbox.offsetTop, 18, '#ffffff', `FPS: ${fps} (aim: ${Math.round(1000 / timeBetween)})`, 'left');
+  renderText(10 + -sandbox.offsetLeft, 25 + -sandbox.offsetTop, 18, '#ffffff', `FPS: ${fps} (aim: ${Math.round(1000 / timeBetween)}) | UPS: ${world.ups} (aim: ${Math.round(1000 / world.updateBetween)})`, 'left');
 
   ctx.globalAlpha = 1;
 

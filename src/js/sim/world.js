@@ -2,7 +2,8 @@ import Food from './food';
 import Creature from './creature';
 
 import Disease from './disease';
-import * as TransmissionMethod from './types/transmissionMethod';
+
+import Weather from './weather';
 
 import { UIWorld } from '../ui/main';
 import * as UIUtil from '/js/ui/util';
@@ -18,15 +19,19 @@ export default class World {
 
     this.eventCallback = function() {};
 
-    this.updateTimes = [];
-    this.updates = 0;
-    this.ups = 0;
     this.lastAddedFood = 0;
+
     this.paused = false;
     this.speed = 1;
     this.elapsedTime = 0;
 
-    this.updateBetween = 100;
+    this.weather = new Weather;
+
+    this.updateBetween = 20;
+    this.ups = Math.round(1000 / this.updateBetween); //0;
+
+    this.updateTimes = [];
+    this.updates = 0;
 
     this.options = {};
 
@@ -52,15 +57,13 @@ export default class World {
 
     let timeCreatureUpdate = performance.now() - startTime;
 
-    for (var i = this.food.length - 1; i >= 0; i--) {
-      this.food[i].update();
+    for (let f of this.food) {
+      f.update();
     }
 
-    /*for (let f of this.food) {
-      f.update();
-    }*/
+    let timeFoodUpdate = performance.now() - startTime; //(startTime + timeCreatureUpdate);
 
-    let timeFoodUpdate = performance.now() - startTime;
+    this.weather.update();
 
     if (this.creatures.length === 0 || this.creatures.filter((c) => !c.dead).length === 0) {
       for (let i = 0; i < 5; i++) {
@@ -73,7 +76,7 @@ export default class World {
       this.lastAddedFood = performance.now();
     }
 
-    if (Math.random() < 0.01 && this.elapsedTime > 1) {
+    if (Math.random() < 0.001 * this.speed && this.elapsedTime > 1) {
       let d = new Disease();
       this.diseases.push(d);
 
@@ -86,7 +89,7 @@ export default class World {
 
     this.updateTimes.push(diff);
 
-    if (this.updateTimes.length > 50) {
+    if (this.updateTimes.length > 100) {
       this.updateTimes.shift();
     }
 
@@ -112,7 +115,7 @@ Compensated: ${UIUtil.showNumber(this.updateBetween - diff)}ms
 Creature: ${UIUtil.showNumber(timeCreatureUpdate)}ms
 Food: ${UIUtil.showNumber(timeFoodUpdate)}ms
 
-UPS: ${this.ups}
+UPS: ${this.ups} (aim: ${Math.round(1000 / this.updateBetween)})
 
 Entities: ${this.creatures.length + this.food.length}
 Food: ${this.food.length}

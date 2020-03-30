@@ -21,7 +21,7 @@ async function foodCallback(type, data) {
   let f = UIFood[type];
 
   if (f !== undefined) {
-    //f(data);
+    f(data);
   }
 }
 
@@ -192,6 +192,8 @@ function zoomOut(world) {
   Renderer.update(world);
 }
 
+let lastKey = undefined;
+
 export function UIInit(world) {
   let fired = false;
 
@@ -243,6 +245,7 @@ export function UIInit(world) {
       }
 
       fired = true;
+      lastKey = e.key;
     }
 
     e.preventDefault();

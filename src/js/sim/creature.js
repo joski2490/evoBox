@@ -152,7 +152,9 @@ export default class Creature extends Thing {
     }
 
     let speed = 0.01 * (this.genes.get('movingSpeed').num + 50 - (this.food / 100)) * this.world.speed;
-    speed = speed / 100 * this.efficiency.movement;
+    speed = speed / 10 / this.world.ups * this.efficiency.movement;
+
+    // console.log(speed);
 
     this.food -= speed / 15;
 
@@ -172,8 +174,8 @@ export default class Creature extends Thing {
       final.divide(tooCloseCreatures.length);
       final.normalise();
 
-      this.x += final.x * 0.2;
-      this.y += final.y * 0.2;
+      this.x += final.x * 0.1;
+      this.y += final.y * 0.1;
     }
 
     let dx = target.x - this.x;
@@ -212,11 +214,11 @@ export default class Creature extends Thing {
       return false;
     }
 
-    this.age += (this.genes.get('ageDegrade').num / 100) * this.world.speed;
+    this.age += (this.genes.get('ageDegrade').num / 200) / this.world.ups * this.world.speed;
 
-    this.food -= (2 / 100 * this.genes.get('hungerDegrade').num) * this.world.speed;
+    this.food -= (this.genes.get('hungerDegrade').num / 5) / this.world.ups * this.world.speed;
 
-    if (Math.random() < (this.genes.get('mutateChance').num / 10000) * this.world.speed) { // Check if should mutate
+    if (Math.random() < (this.genes.get('mutateChance').num / 10000 / this.world.ups) * this.world.speed) { // Check if should mutate
       this.mutate();
     }
 
@@ -226,7 +228,9 @@ export default class Creature extends Thing {
 
         this.lastReproduction = this.age;
       } else {
-        let nearbyMates = this.world.creatures.filter((c) => c.reproductionMethod === ReproductionMethod.mating && c.lookingForMate === true && c !== this).sort((a, b) => Util.distance(this, a) - Util.distance(this, b));
+        let wantedSex = this.sex === Sex.male ? Sex.female : Sex.male;
+
+        let nearbyMates = this.world.creatures.filter((c) => c.reproductionMethod === ReproductionMethod.mating && c.lookingForMate === true && c.sex === wantedSex && c !== this).sort((a, b) => Util.distance(this, a) - Util.distance(this, b));
 
         this.lookingForMate = true;
 

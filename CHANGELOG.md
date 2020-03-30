@@ -1,5 +1,20 @@
 # evoBox Changelog
 
+## [DEV] v2.0.0 (March 30th)
+
+### Features
+- Increased default UPS aim to 50 (10 > 50)
+- Rebalanced all rates to be not dependent on UPS
+- Rebalanced and tweaked some rates
+- Added cause of death to log when creatures dies
+- Added UPS to text in top left
+- Added emoji mode (again)
+
+### Changes
+- Reproduction can now only be with the opposite sex
+- Lowered top left text
+
+
 ## v1.0.1 (March 27th)
 
 ### Features

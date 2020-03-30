@@ -1,6 +1,6 @@
 {
   "name": "evobox",
-  "version": "1.0.0",
+  "version": "2.0.0-dev1",
   "description": "Genetic evolution / creature simulator.",
   "main": "code.js",
   "scripts": {

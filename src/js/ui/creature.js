@@ -56,7 +56,7 @@ export function create(creature) {
 }
 
 export function die(creature) {
-  UIUtil.addLog(`${creature.name} died`, 'bad');
+  UIUtil.addLog(`${creature.name} died (${creature.food <= 0 ? 'starvation' : (creature.age >= 100 ? 'old age' : 'other')})`, 'bad');
 
   addParticles('skull', 5, creature);
 }

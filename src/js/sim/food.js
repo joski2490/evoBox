@@ -12,7 +12,7 @@ export default class Food extends Thing {
   }
 
   update() {
-    this.quality -= 0.2 * this.world.speed;
+    this.quality -= 1 / this.world.ups * this.world.speed; // TODO: balance all rates to be not dependent on frame rate - use world.ups and world.elapsedTime (and others maybe)
 
     setTimeout(function() { this.eventCallback('update', this); }.bind(this), 1);
 
