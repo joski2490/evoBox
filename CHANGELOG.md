@@ -1,6 +1,6 @@
 # evoBox Changelog
 
-## [DEV] v2.0.0 (March 30th)
+## [DEV] v2.0.0 (April 18th)
 
 ### Features
 - Increased default UPS aim to 50 (10 > 50)
@@ -9,6 +9,9 @@
 - Added cause of death to log when creatures dies
 - Added UPS to text in top left
 - Added emoji mode (again)
+- Made target lines dashed
+- Removed frame rate aim / lock
+- Removed background animation for performance
 
 ### Changes
 - Reproduction can now only be with the opposite sex
