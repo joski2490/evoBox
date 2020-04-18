@@ -106,7 +106,7 @@ export function update() {
 
     let pos = UIUtil.getWindowPosition(c.rendererPos);
 
-    if (c.target?.rendererPos !== undefined) { // Draw line to target first so it's behind
+    if (c.target !== undefined && c.target.rendererPos !== undefined) { // Draw line to target first so it's behind
       ctx.globalAlpha = 0.25;
 
       ctx.strokeStyle = `hsl(${c.genes.get('colorHue').num * 3.6}, 100%, ${c.genes.get('colorLightness').num + 10}%)`;
